@@ -1,2 +1,4 @@
+atmos/
 .*
 !.gitignore
+!.local

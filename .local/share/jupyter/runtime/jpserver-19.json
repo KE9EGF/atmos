@@ -1,0 +1,13 @@
+{
+  "base_url": "/user/ke9egf-atmos-vtpokdtt/",
+  "hostname": "0.0.0.0",
+  "password": false,
+  "pid": 19,
+  "port": 8888,
+  "root_dir": "/home/jovyan",
+  "secure": false,
+  "sock": "",
+  "token": "LK68lKv_RC6eLsxLyWqokQ",
+  "url": "http://jupyter-ke9egf-atmos-vtpokdtt:8888/user/ke9egf-atmos-vtpokdtt/",
+  "version": "2.17.0"
+}
