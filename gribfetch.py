@@ -24,8 +24,8 @@ while True:
         modelConfig = {
         "GFS": {
             "baseUrl": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/",
-            "availableTypes": ["pgrb2", "pgrb2full", "goessimpgrb2", "", "", "", ""],
-            "availableExtensions": [],
+            "availableTypes": ["pgrb2", "pgrb2full", "goessimpgrb2", "sfluxgribf", "wgne", ""],
+            "availableExtensions": [".grib2", ".nc"],
             "availableResolutions": [0.25, 0.5, 1],
             "maxForecastHour": 180,
             "forecastStepping": 180,
