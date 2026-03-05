@@ -20,16 +20,18 @@ while True:
         # Dictionaries, Lists, Variables, and Other Crap. This took so long.
         defaultGRIBType = "GRIB2"
         availableModels = ["GFS", "ECMWF", "NAM", "HRRR", "CMC", "ARW"]
-        defaultChunkSize = 4096
+        defaultChunkSize = 1028 # kB
         modelConfig = {
         "GFS": {
             "baseUrl": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/",
-            "availableTypes": ["pgrb2", "pgrb2full", "goessimpgrb2", "sfluxgribf", "wgne", ""],
-            "availableExtensions": [".grib2", ".nc"],
-            "availableResolutions": [0.25, 0.5, 1],
+            "availableTypes": ["pgrb2", "pgrb2full", "goessimpgrb2", "sfluxgrib", "wgne", "sfc", "atm"],
+            "availableExtensions": [".grib2", ".nc"], # SFC and ATM files are stored in .nc format.
+            "availableResolutions": [0.25, 0.5, 1], # Degrees
             "maxForecastHour": 180,
-            "forecastStepping": 180,
-            "runTimes": [0, 6, 12, 18]
+            "maxSfcAtmForecastHour": 12
+            "forecastStepping": 180,      # Minutes
+            "sfluxForecastStepping": 60,  # Minutes
+            "runTimes": [0, 6, 12, 18]    # UTC 
         },
         "ECMWF": {
         
