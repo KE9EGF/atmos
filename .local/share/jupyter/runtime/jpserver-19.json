@@ -1,5 +1,5 @@
 {
-  "base_url": "/user/ke9egf-atmos-uw79l9af/",
+  "base_url": "/user/ke9egf-atmos-88w75o59/",
   "hostname": "0.0.0.0",
   "password": false,
   "pid": 19,
@@ -7,7 +7,7 @@
   "root_dir": "/home/jovyan",
   "secure": false,
   "sock": "",
-  "token": "NW8ZaUKnQKG20xDWjDq5jQ",
-  "url": "http://jupyter-ke9egf-atmos-uw79l9af:8888/user/ke9egf-atmos-uw79l9af/",
+  "token": "SS0hyCueS_-Z-quqvPJAcA",
+  "url": "http://jupyter-ke9egf-atmos-88w75o59:8888/user/ke9egf-atmos-88w75o59/",
   "version": "2.17.0"
 }
