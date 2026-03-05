@@ -1,3 +1,5 @@
 atmos/
 .*
 !.gitignore
+!.ipython
+!.jupyter
