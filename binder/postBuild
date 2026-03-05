@@ -1,2 +1,6 @@
 git config --global user.email "severett078@gmail.com"
 git config --global user.name "KE9EGF"
+export PATH=$HOME/.local/bin:$PATH
+python3.12 -m virtualenv atmos
+source atmos/bin/activate
+export PYTHONPATH=/atmos/python3.12/site-packages:$PYTHONPATH
