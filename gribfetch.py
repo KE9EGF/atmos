@@ -28,7 +28,7 @@ while True:
             "availableExtensions": [".grib2", ".nc"], # SFC and ATM files are stored in .nc format.
             "availableResolutions": [0.25, 0.5, 1], # Degrees
             "maxForecastHour": 180,
-            "maxSfcAtmForecastHour": 12
+            "maxSfcAtmForecastHour": 12,
             "forecastStepping": 180,      # Minutes
             "sfluxForecastStepping": 60,  # Minutes
             "runTimes": [0, 6, 12, 18]    # UTC 
@@ -53,7 +53,7 @@ while True:
         # User Input, just how I like it.
         running = True
         while running:
-            time.sleep(1)
+            time.sleep(0.5)
             print("\nPlease select what model GRIB you would like.")
             print("""
             0 - GFS
