@@ -43,7 +43,7 @@ while True:
             },
         },
         "ECMWF": {
-        
+         
         },
         "NAM": {
             "baseUrl": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/nam/prod/"
@@ -95,6 +95,9 @@ while True:
                     time.sleep(0.5)
                     break
 
-            
+            print(f'Please select what type of {modelChoice} GRIB you want.\n')
+            for type in modelConfig[modelChoice["availableTypes"]]:
+                
+
     except KeyboardInterrupt:
         sys.exit()
