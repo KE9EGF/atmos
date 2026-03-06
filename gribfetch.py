@@ -18,19 +18,28 @@ while True:
             sys.exit()
             
         # Dictionaries, Lists, Variables, and Other Crap. This took so long.
+        # MAY REWRITE THIS LATER ON FOR GRIB FILTER SUPPORT!!
         defaultGRIBType = "GRIB2"
         availableModels = ["GFS", "ECMWF", "NAM", "HRRR", "CMC", "ARW"]
         defaultChunkSize = 1028 # kB
         modelConfig = {
         "GFS": {
             "baseUrl": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/",
-            "availableTypes": ["pgrb2", "pgrb2full", "goessimpgrb2", "sfluxgrib", "wgne", "sfc", "atm"],
+            "availableTypes": ["atm", "pgrb2","pgrb2b", "pgrb2full", "goessimpgrb2", "sfc", "sfluxgrib", "wgne"],
             "availableExtensions": [".grib2", ".nc"], # SFC and ATM files are stored in .nc format.
-            "availableResolutions": [0.25, 0.5, 1],   # Degrees
-            "runTimes": [0, 6, 12, 18]                # UTC 
-            "forecastTimings": {                      # Corresponds to each type in availableTypes
-                # [STEPPING (minutes), MAX HOUR]
-                ""
+            "availableResolutions": ["0p25", "0p50", "1p00"], # Degrees
+            "runTimes": [0, 6, 12, 18], # UTC 
+            "forecastTimings": { # Corresponds to each type in availableTypes
+                # 2-value: [STEPPING (minutes), MAX HOUR] 
+                # 3-value: [EARLY STEPPING (<f120), LATE STEPPING (>f120), MAX HOUR]
+                "atm": [60, 12],
+                "goessimpgrb2": [180, 180],
+                "pgrb2": [60, 180, 384],
+                "pgrb2b": [60, 180, 384],
+                "pgrb2full": [180, 384],
+                "sfc": [60, 12],
+                "sfluxgrb": [60, 180, 384], 
+                "wgne": [180, 180]
             },
         },
         "ECMWF": {
@@ -66,22 +75,23 @@ while True:
             try:
                 modelChoice = int(input("--> ").strip())
             except ValueError:
-                print("Please enter a number.")
+                print("\nPlease enter a number.")
                 break
             
             # Model Conditionals, the complicated stuff. This took longer, but was straightforward.
-            if modelChoice >= 0 and modelChoice < 6:
-                print(f'You chose {availableModels[modelChoice]}. Is this correct?')
-                userModelConfirm = input("(Y/N) --> ").strip().upper()
-                if userModelConfirm == "Y":
-                    pass
-                elif userModelConfirm == "N":
-                    continue
+            while True:
+                if modelChoice >= 0 and modelChoice < 6:
+                    print(f'\nYou chose {availableModels[modelChoice]}. Is this correct?')
+                    modelConfirm = input("(Y/N) --> ").strip().upper()
+                    if modelConfirm == "Y" and modelConfirm.isalpha() and len(modelConfirm) == 1:
+                        pass
+                    elif modelConfirm == "N" and modelConfirm.isalpha() and len(modelConfirm) == 1:
+                        break
+                    else:
+                        print("\nReally? You couldn't type Y or N? Butterfingers...")
+                        time.sleep(1)
                 else:
-                    print("Really? You couldn't type Y or N? Butterfingers...")
-                    time.sleep(1)
-            else:
-                print("Please select a valid option.")
-                break
+                    print("\nPlease select a valid option.")
+                    time.sleep(0.5)
     except KeyboardInterrupt:
         sys.exit()
