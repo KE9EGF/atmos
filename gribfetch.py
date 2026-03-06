@@ -84,7 +84,7 @@ while True:
                     print(f'\nYou chose {availableModels[modelChoice]}. Is this correct?')
                     modelConfirm = input("(Y/N) --> ").strip().upper()
                     if modelConfirm == "Y" and modelConfirm.isalpha() and len(modelConfirm) == 1:
-                        pass
+                        break
                     elif modelConfirm == "N" and modelConfirm.isalpha() and len(modelConfirm) == 1:
                         break
                     else:
@@ -93,5 +93,8 @@ while True:
                 else:
                     print("\nPlease select a valid option.")
                     time.sleep(0.5)
+                    break
+
+            
     except KeyboardInterrupt:
         sys.exit()
