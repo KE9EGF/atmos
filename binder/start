@@ -1,0 +1,7 @@
+git config --global user.email "severett078@gmail.com" || true
+git config --global user.name "KE9EGF" || true
+export PATH=$HOME/.local/bin:$PATH || true
+python3.12 -m virtualenv atmos || true
+source atmos/bin/activate || true
+python3.12 -m pip install -r packages.txt || true
+export PYTHONPATH=/atmos/python3.12/site-packages:$PYTHONPATH || true
