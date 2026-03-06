@@ -26,12 +26,12 @@ while True:
             "baseUrl": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/",
             "availableTypes": ["pgrb2", "pgrb2full", "goessimpgrb2", "sfluxgrib", "wgne", "sfc", "atm"],
             "availableExtensions": [".grib2", ".nc"], # SFC and ATM files are stored in .nc format.
-            "availableResolutions": [0.25, 0.5, 1], # Degrees
-            "maxForecastHour": 180,
-            "maxSfcAtmForecastHour": 12,
-            "forecastStepping": 180,      # Minutes
-            "sfluxForecastStepping": 60,  # Minutes
-            "runTimes": [0, 6, 12, 18]    # UTC 
+            "availableResolutions": [0.25, 0.5, 1],   # Degrees
+            "runTimes": [0, 6, 12, 18]                # UTC 
+            "forecastTimings": {                      # Corresponds to each type in availableTypes
+                # [STEPPING (minutes), MAX HOUR]
+                ""
+            },
         },
         "ECMWF": {
         
@@ -69,7 +69,7 @@ while True:
                 print("Please enter a number.")
                 break
             
-            # Model Conditionals, the complicated stuff. This took longer.
+            # Model Conditionals, the complicated stuff. This took longer, but was straightforward.
             if modelChoice >= 0 and modelChoice < 6:
                 print(f'You chose {availableModels[modelChoice]}. Is this correct?')
                 userModelConfirm = input("(Y/N) --> ").strip().upper()
