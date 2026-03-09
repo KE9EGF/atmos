@@ -8,8 +8,8 @@ while True:
             import requests as rq
             import time
             import tqdm
-            import datetime as dt
             import xarray as xa
+            from datetime import datetime as dt
             from tqdm import tqdm
         except ImportError as e:
             print("Error: Missing required library.")
@@ -59,45 +59,88 @@ while True:
         }
         }
         
-        # User Input, just how I like it.
+        # User Input and Conditionals. God this took so long
         running = True
         while running:
-            time.sleep(0.5)
-            print("\nPlease select what model GRIB you would like.")
-            print("""
-            0 - GFS
-            1 - ECMWF
-            2 - NAM
-            3 - HRRR
-            4 - CMC
-            5 - ARW
-            \n""")
-            try:
-                modelChoice = int(input("--> ").strip())
-            except ValueError:
-                print("\nPlease enter a number.")
-                break
-            
-            # Model Conditionals, the complicated stuff. This took longer, but was straightforward.
+            currentTime = dt.now()
+            # Model Selection
             while True:
+                time.sleep(0.5)
+                print("\nPlease select what model of GRIB you would like.")
+                print("""
+                0 - GFS
+                1 - ECMWF
+                2 - NAM
+                3 - HRRR
+                4 - CMC
+                5 - ARW
+                \n""")
+                try:
+                    modelChoice = int(input("--> ").strip())
+                except ValueError:
+                    print("\nPlease enter a number.")
+                    
                 if modelChoice >= 0 and modelChoice < 6:
                     print(f'\nYou chose {availableModels[modelChoice]}. Is this correct?')
                     modelConfirm = input("(Y/N) --> ").strip().upper()
                     if modelConfirm == "Y" and modelConfirm.isalpha() and len(modelConfirm) == 1:
                         break
                     elif modelConfirm == "N" and modelConfirm.isalpha() and len(modelConfirm) == 1:
-                        break
+                        continue
                     else:
                         print("\nReally? You couldn't type Y or N? Butterfingers...")
                         time.sleep(1)
                 else:
                     print("\nPlease select a valid option.")
                     time.sleep(0.5)
+                    continue
+
+            # Type Selection        
+            while True:
+                print(f'Please select what type of {availableModels[modelChoice]} GRIB you want.\n')
+                for index, type in enumerate(modelConfig[availableModels[modelChoice]]["availableTypes"]):
+                    print(f'{index} - {type}')
+                try:
+                    typeChoice = int(input("--> ").strip())
+                except ValueError:
+                    print("\nPlease enter a number.")
+                if typeChoice >= 0 and typeChoice < len(modelConfig[availableModels[modelChoice]]["availableTypes"]) - 1:
+                    print(f'\nYou chose {modelConfig[availableModels[modelChoice]]["availableTypes"][typeChoice]}. Is this correct?')
+                typeConfirm = input("(Y/N) --> ").strip().upper()
+                if typeConfirm == "Y" and typeConfirm.isalpha() and len(typeConfirm) == 1:
                     break
+                elif typeConfirm == "N" and typeConfirm.isalpha() and len(typeConfirm) == 1:
+                    continue
+                else:
+                    print("\nReally? You couldn't type Y or N? Butterfingers...")
+                    time.sleep(1)
 
-            print(f'Please select what type of {modelChoice} GRIB you want.\n')
-            for type in modelConfig[modelChoice["availableTypes"]]:
+            # Date, Time, and Final Selection for the main file. Had to make an If for each model.
+            while True:
+                # GFS
+                if modelChoice == 0:
+                    print(f'Please select a date for your {modelConfig["GFS"]["availableTypes"][typeChoice].upper()} GFS GRIB.')
+                    
+                    
+                # ECMWF
+                if modelChoice == 1:
+                    print()
                 
-
+                # NAM (WILL ADD NAM NEST SUPPORT IN THE FUTURE)
+                if modelChoice == 2:
+                    print()
+                
+                # HRRR
+                if modelChoice == 3:
+                    print()
+                
+                # CMC
+                if modelChoice == 4:
+                    print()
+                
+                # ARW
+                if modelChoice == 5:
+                    print()          
+                    
     except KeyboardInterrupt:
         sys.exit()

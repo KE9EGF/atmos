@@ -5,4 +5,4 @@ python3.12 -m virtualenv atmos || true
 source atmos/bin/activate
 python3.12 -m pip install -r packages.txt || true
 export PYTHONPATH=/atmos/python3.12/site-packages:$PYTHONPATH
-source atmos/bin/activate
+source /atmos/bin/activate
