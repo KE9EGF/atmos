@@ -9,7 +9,8 @@ while True:
             import time
             import tqdm
             import xarray as xa
-            from datetime import datetime as dt
+            import datetime as dt
+            import re
             from tqdm import tqdm
         except ImportError as e:
             print("Error: Missing required library.")
@@ -28,7 +29,8 @@ while True:
             "availableTypes": ["atm", "pgrb2","pgrb2b", "pgrb2full", "goessimpgrb2", "sfc", "sfluxgrib", "wgne"],
             "availableExtensions": [".grib2", ".nc"], # SFC and ATM files are stored in .nc format.
             "availableResolutions": ["0p25", "0p50", "1p00"], # Degrees
-            "runTimes": [0, 6, 12, 18], # UTC 
+            "runTimes": [0, 6, 12, 18], # UTC
+            "archiveLimit": 9, # Days
             "forecastTimings": { # Corresponds to each type in availableTypes
                 # 2-value: [STEPPING (minutes), MAX HOUR] 
                 # 3-value: [EARLY STEPPING (<f120), LATE STEPPING (>f120), MAX HOUR]
@@ -62,7 +64,10 @@ while True:
         # User Input and Conditionals. God this took so long
         running = True
         while running:
-            currentTime = dt.now()
+            # This is in here to constantly update.
+            currentDT = dt.datetime.now()
+            year, month, day, hour = currentDT.year, currentDT.month, currentDT.day, currentDT.hour
+            
             # Model Selection
             while True:
                 time.sleep(0.5)
@@ -115,34 +120,17 @@ while True:
                     print("\nReally? You couldn't type Y or N? Butterfingers...")
                     time.sleep(1)
 
-            # Date, Time, and Final Selection for the main file. Had to make an If for each model.
+            # Date, Time, and Final Selection for the main file. TODO: Optimize with pure logic selection.
             while True:
-                # GFS
-                if modelChoice == 0:
-                    print(f'Please select a date for your {modelConfig["GFS"]["availableTypes"][typeChoice].upper()} GFS GRIB.')
-                    dateSelection = input("(MM/DD/YYYY) --> ")
-                    
-                    if dateSelection >= 
-                    
-                # ECMWF
-                if modelChoice == 1:
-                    print()
+                dateLimit = currentDT - dt.timedelta(modelConfig[availableModels[modelChoice]]["archiveLimit"])
                 
-                # NAM (WILL ADD NAM NEST SUPPORT IN THE FUTURE)
-                if modelChoice == 2:
-                    print()
+                print(f'Please select a date for your {modelConfig[availableModels[modelChoice]]["availableTypes"][typeChoice].upper()} {availableModels[modelChoice].upper()} GRIB.')
+                dateSelection = input("(YYYY-MM-DD) --> ").split("-")
+            
+                print(dateSelection)   
                 
-                # HRRR
-                if modelChoice == 3:
-                    print()
+                print(dateLimit)
                 
-                # CMC
-                if modelChoice == 4:
-                    print()
-                
-                # ARW
-                if modelChoice == 5:
-                    print()          
-                    
     except KeyboardInterrupt:
+        print("\n")
         sys.exit()
