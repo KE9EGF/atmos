@@ -120,7 +120,9 @@ while True:
                 # GFS
                 if modelChoice == 0:
                     print(f'Please select a date for your {modelConfig["GFS"]["availableTypes"][typeChoice].upper()} GFS GRIB.')
+                    dateSelection = input("(MM/DD/YYYY) --> ")
                     
+                    if dateSelection >= 
                     
                 # ECMWF
                 if modelChoice == 1:
