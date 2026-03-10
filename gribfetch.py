@@ -19,48 +19,99 @@ while True:
             
         # Dictionaries, Lists, Variables, and Other Crap. This took so long.
         # MAY REWRITE THIS LATER ON FOR GRIB FILTER SUPPORT!!
+        getStepping(model, type, resolution=None):
+            stepping = modelConfig[model][typeConfig][type][stepping]
+            if resolution is None:
+                return stepping
+            else:
+                return stepping[resolution]
         defaultGRIBType = "GRIB2"
         availableModels = ["GFS", "ECMWF", "NAM", "HRRR", "CMC", "ARW"]
         defaultChunkSize = 1028 # kB
         modelConfig = {
         "GFS": {
             "baseUrl": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/",
-            "availableTypes": ["atm", "pgrb2","pgrb2b", "pgrb2full", "goessimpgrb2", "sfc", "sfluxgrib", "wgne"],
+            "availableTypes": ["atm", "pgrb2","pgrb2b", "pgrb2full", "goessimpgrb2", "sfc", "sfluxgrb", "wgne"],
             "runTimes": [0, 6, 12, 18], # UTC
             "archiveLimit": 9, # Days
+            "lateSteppingThreshold": 120, # Hours
             "typeConfig": {
                 # SFC and ATM files are stored in .NC format.
                 # .NC (NetCDF4) FILES DO NOT HAVE RESOLUTIONS!
                 # Stepping is... complicated. They vary with resolution.
-                # 2-value: [STEPPING (hours), MAX HOUR]
-                # 3-value: [EARLY STEPPING (f<120), LATE STEPPING (f>120), MAX HOUR]
+                # 1-value: [STEPPING (hours)]
+                # 2-value: [EARLY STEPPING (f<120), LATE STEPPING (f>120)]
                 "atm": {
+                    "resolutions": None,
                     "extension": ".nc",
-                    "stepping": [1, 12]
+                    "minHour": 000,
+                    "maxHour": 012,
+                    "stepping": 1,
+                    "analysisSupport": True
                 },
                 "goessimpgrb2": {
-                    "resolutions": ["0.25°"],
+                    "resolutions": ["0p25"],
                     "extension": ".grib2",
-                    "stepping": [3, 180]
+                    "minHour": 000,
+                    "maxHour": 180,
+                    "stepping": 3,
+                    "analysisSupport": False
                 },
                 "pgrb2": {
-                    "resolutions": ["0.25°", "0.50°", "1.00°"]
-                    "extension": ".grib2"
+                    "resolutions": ["0p25", "0p50", "1p00"],
+                    "extension": ".grib2",
+                    "minHour": 000,
+                    "maxHour": 384,
+                    "stepping": {
+                        "0p25": [1, 3],
+                        "0p50": 3,
+                        "1p00": 3
+                    },
+                    "analysisSupport": True
                 },
                 "pgrb2b": {
-                    
+                    "resolutions": ["0p25", "0p50", "1p00"],
+                    "extension": ".grib2",
+                    "minHour": 000,
+                    "maxHour": 384,
+                    "stepping": {
+                        "0p25": [1, 3],
+                        "0p50": 3,
+                        "1p00": 3
+                    },
+                    "analysisSupport": True
                 },
                 "pgrb2full": {
-                    
+                    "resolutions": ["0p50"],
+                    "extension": ".grib2",
+                    "minHour": 000,
+                    "maxHour": 384,
+                    "stepping": 3,
+                    "analysisSupport": False
                 },
                 "sfc": {
-                    
+                    "resolutions": None,
+                    "extension": ".nc",
+                    "minHour": 001,
+                    "maxHour": 012,
+                    "stepping": 1,
+                    "analysisSupport": True
                 },
                 "sfluxgrb": {
-                    
+                    "resolutions": None,
+                    "extension": ".grib2",
+                    "minHour": 000,
+                    "maxHour": 384,
+                    "stepping": [1, 3],
+                    "analysisSupport": False
                 },
                 "wgne": {
-                    
+                    "resolutions": None,
+                    "extension": ".grib2",
+                    "minHour": 003,
+                    "maxHour": 180,
+                    "stepping": 3,
+                    "analysisSupport": False
                 }
             }
             },
@@ -147,7 +198,7 @@ while True:
                 dateSelection = input("(YYYY-MM-DD) --> ").replace("-", "")
                 dateSelection = int(dateSelection)
                 if dateSelection > currentDate:
-                    print("\nSorry, we don't support fetching GRIBs from the future.")
+                    print("\nSorry, we don't support fetching GRIBs from the future... yet.")
                     time.sleep(1)
                 if dateSelection < dateLimit:
                     print("\nThe entered date is older than the archive limit")
