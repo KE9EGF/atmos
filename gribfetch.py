@@ -26,21 +26,43 @@ while True:
         "GFS": {
             "baseUrl": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/",
             "availableTypes": ["atm", "pgrb2","pgrb2b", "pgrb2full", "goessimpgrb2", "sfc", "sfluxgrib", "wgne"],
-            "availableExtensions": [".grib2", ".nc"], # SFC and ATM files are stored in .nc format.
-            "availableResolutions": ["0p25", "0p50", "1p00"], # Degrees
             "runTimes": [0, 6, 12, 18], # UTC
             "archiveLimit": 9, # Days
-            "forecastTimings": { # Corresponds to each type in availableTypes
-                # 2-value: [STEPPING (minutes), MAX HOUR] 
-                # 3-value: [EARLY STEPPING (<f120), LATE STEPPING (>f120), MAX HOUR]
-                "atm": [60, 12],
-                "goessimpgrb2": [180, 180],
-                "pgrb2": [60, 180, 384],
-                "pgrb2b": [60, 180, 384],
-                "pgrb2full": [180, 384],
-                "sfc": [60, 12],
-                "sfluxgrb": [60, 180, 384], 
-                "wgne": [180, 180]
+            "typeConfig": {
+                # SFC and ATM files are stored in .NC format.
+                # .NC (NetCDF4) FILES DO NOT HAVE RESOLUTIONS!
+                # Stepping is... complicated. They vary with resolution.
+                # 2-value: [STEPPING (hours), MAX HOUR]
+                # 3-value: [EARLY STEPPING (f<120), LATE STEPPING (f>120), MAX HOUR]
+                "atm": {
+                    "extension": ".nc",
+                    "stepping": [1, 12]
+                },
+                "goessimpgrb2": {
+                    "resolutions": ["0.25°"],
+                    "extension": ".grib2",
+                    "stepping": [3, 180]
+                },
+                "pgrb2": {
+                    "resolutions": ["0.25°", "0.50°", "1.00°"]
+                    "extension": ".grib2"
+                },
+                "pgrb2b": {
+                    
+                },
+                "pgrb2full": {
+                    
+                },
+                "sfc": {
+                    
+                },
+                "sfluxgrb": {
+                    
+                },
+                "wgne": {
+                    
+                }
+            }
             },
         },
         "ECMWF": {
