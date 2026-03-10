@@ -120,13 +120,12 @@ while True:
                     print("\nReally? You couldn't type Y or N? Butterfingers...")
                     time.sleep(1)
 
-            # Date, Time, and Final Selection for the main file. TODO: Optimize with pure logic selection.
+            # Date, Time, and Final Selection for the main file. TODO: Optimize with pure logic selection and utilise Xarray for regional file selection using 2 pairs of latitude and longitude to make a quadrant.
             while True:
                 dateLimit = currentDT - dt.timedelta(modelConfig[availableModels[modelChoice]]["archiveLimit"])
-                
                 print(f'Please select a date for your {modelConfig[availableModels[modelChoice]]["availableTypes"][typeChoice].upper()} {availableModels[modelChoice].upper()} GRIB.')
-                dateSelection = input("(YYYY-MM-DD) --> ").split("-")
-            
+                rawDateSelection = input("(YYYY-MM-DD) --> ").replace("-", "")
+                dateSelection = int(rawDateSelection)
                 print(dateSelection)   
                 
                 print(dateLimit)
