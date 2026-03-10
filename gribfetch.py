@@ -10,7 +10,6 @@ while True:
             import tqdm
             import xarray as xa
             import datetime as dt
-            import re
             from tqdm import tqdm
         except ImportError as e:
             print("Error: Missing required library.")
@@ -66,20 +65,15 @@ while True:
         while running:
             # This is in here to constantly update.
             currentDT = dt.datetime.now()
-            year, month, day, hour = currentDT.year, currentDT.month, currentDT.day, currentDT.hour
+            currentDate = currentDT.strftime("%Y%m%d")
+            currentDate = int(currentDate)
             
             # Model Selection
             while True:
                 time.sleep(0.5)
                 print("\nPlease select what model of GRIB you would like.")
-                print("""
-                0 - GFS
-                1 - ECMWF
-                2 - NAM
-                3 - HRRR
-                4 - CMC
-                5 - ARW
-                \n""")
+                for index, model in enumerate(availableModels):
+                    print(f'{index} - {model}')
                 try:
                     modelChoice = int(input("--> ").strip())
                 except ValueError:
@@ -120,16 +114,23 @@ while True:
                     print("\nReally? You couldn't type Y or N? Butterfingers...")
                     time.sleep(1)
 
-            # Date, Time, and Final Selection for the main file. TODO: Optimize with pure logic selection and utilise Xarray for regional file selection using 2 pairs of latitude and longitude to make a quadrant.
+            # Date, Time, and Final Selection for the main file. 
+            # TODO: Optimize with pure logic selection and utilise Xarray for regional file selection using 2 pairs of   latitude and longitude to make a quadrant.
             while True:
-                dateLimit = currentDT - dt.timedelta(modelConfig[availableModels[modelChoice]]["archiveLimit"])
-                print(f'Please select a date for your {modelConfig[availableModels[modelChoice]]["availableTypes"][typeChoice].upper()} {availableModels[modelChoice].upper()} GRIB.')
-                rawDateSelection = input("(YYYY-MM-DD) --> ").replace("-", "")
-                dateSelection = int(rawDateSelection)
-                print(dateSelection)   
+                rawDateLimit = currentDT - dt.timedelta(modelConfig[availableModels[modelChoice]]["archiveLimit"])
+                dateLimit = rawDateLimit.strftime("%Y%m%d")
+                dateLimit = int(dateLimit)
                 
-                print(dateLimit)
-                
+                print(f'\nPlease select a date for your {modelConfig[availableModels[modelChoice]]["availableTypes"][typeChoice].upper()} {availableModels[modelChoice]} GRIB.')
+                dateSelection = input("(YYYY-MM-DD) --> ").replace("-", "")
+                dateSelection = int(dateSelection)
+                if dateSelection > currentDate:
+                    print("\nSorry, we don't support fetching GRIBs from the future.")
+                    time.sleep(1)
+                if dateSelection < dateLimit:
+                    print("\nThe entered date is older than the archive limit")
+                    print(f'The earliest accessible {availableModels[modelChoice]} GRIBs are from: {rawDateLimit.strftime("%Y-%m-%d")}')
+                    time.sleep(1)
     except KeyboardInterrupt:
         print("\n")
         sys.exit()

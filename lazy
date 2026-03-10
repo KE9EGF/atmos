@@ -3,6 +3,6 @@ git config --global user.name "KE9EGF"
 export PATH=$HOME/.local/bin:$PATH
 python3.12 -m virtualenv atmos || true
 source atmos/bin/activate
-python3.12 -m pip install -r packages.txt || true
+python3.12 -m pip install tqdm requests xarray  || true
 export PYTHONPATH=/atmos/python3.12/site-packages:$PYTHONPATH
-source /atmos/bin/activate
+source /atmos/bin/activate || true
