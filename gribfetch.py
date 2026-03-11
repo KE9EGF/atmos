@@ -209,7 +209,7 @@ while True:
                 print("REMEMBER: THIS PROGRAM'S CLOCK IS SET 3.5 HOURS BEHIND TO ACCOUNT FOR PROCESSING AND UPLOAD TIME ON THE NWS'S SIDE!")
                 dateSelection = input("(YYYY-MM-DD) --> ").replace("-", "")
                 dateSelection = int(dateSelection)
-                if dateSelection > currentLaggedDate:
+                if dateSelection > currentLaggedDT:
                     print("\nSorry, we don't support fetching GRIBs from the future... yet.")
                     time.sleep(1)
                 elif dateSelection < dateLimit:
@@ -219,7 +219,7 @@ while True:
                 index = 0    
                 print(f'Please select a run time (UTC) for your {modelConfig[availableModels[modelChoice]]["availableTypes"][typeChoice].upper()} {availableModels[modelChoice]} GRIB.')
                 for runTime in modelConfig[availableModels[modelChoice]]["runTimes"]:
-                    if runTime > currentLaggedDT:
+                    if runTime > currentLaggedDT: # Fix this
                         print(f'No {modelConfig[availableModels[modelChoice]]["availableTypes"][typeChoice].upper()} {availableModels[modelChoice]} GRIBs for this run time seem to be available yet')
                     if runTime > currentDT.hour and dateSelection == currentDate:
                         break
