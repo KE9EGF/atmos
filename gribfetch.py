@@ -145,11 +145,10 @@ while True:
         while running:
             # This is in here to constantly update.
             currentDT = dt.datetime.now(dt.timezone.utc)
-            offset = dt.timedelta(hours=3, minutes=40)
-            currentLaggedDT = currentDT - offset
-            currentDate = currentLaggedDT.strftime("%Y%m%d")
+            offset = dt.timedelta(hours=3, minutes=30)
+            currentDate = currentDT.strftime("%Y%m%d")
             currentDate = int(currentDate)
-            currentTime = currentLaggedDT.strftime("%H%M")
+            currentTime = currentDT.strftime("%H%M")
             print(currentLaggedDT)
             # Model Selection
             while True:
@@ -209,7 +208,7 @@ while True:
                 print("REMEMBER: THIS PROGRAM'S CLOCK IS SET 3.5 HOURS BEHIND TO ACCOUNT FOR PROCESSING AND UPLOAD TIME ON THE NWS'S SIDE!")
                 dateSelection = input("(YYYY-MM-DD) --> ").replace("-", "")
                 dateSelection = int(dateSelection)
-                if dateSelection > currentLaggedDT:
+                if dateSelection > currentDate:
                     print("\nSorry, we don't support fetching GRIBs from the future... yet.")
                     time.sleep(1)
                 elif dateSelection < dateLimit:
