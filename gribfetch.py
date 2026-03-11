@@ -47,7 +47,8 @@ while True:
                         "minHour": 0,
                         "maxHour": 12,
                         "stepping": 1,
-                        "analysisSupport": True
+                        "analysisSupport": True,
+                        "fileName": "gfs.t{run}z.atm{fhr}.nc"
                     },
                     "goessimpgrb2": {
                         "resolutions": ["0p25"],
@@ -55,7 +56,8 @@ while True:
                         "minHour": 000,
                         "maxHour": 180,
                         "stepping": 3,
-                        "analysisSupport": False
+                        "analysisSupport": False,
+                        "fileName": "gfs.t{run}.goessimpgrb2.{res}.{fhr}"
                     },
                     "pgrb2": {
                         "resolutions": ["0p25", "0p50", "1p00"],
@@ -67,7 +69,8 @@ while True:
                             "0p50": 3,
                             "1p00": 3
                         },
-                        "analysisSupport": True
+                        "analysisSupport": True,
+                        "fileName": "gfs.t{run}z.pgrb2.{res}.{fhr}"
                     },
                     "pgrb2b": {
                         "resolutions": ["0p25", "0p50", "1p00"],
@@ -79,7 +82,8 @@ while True:
                             "0p50": 3,
                             "1p00": 3
                         },
-                        "analysisSupport": True
+                        "analysisSupport": True,
+                        "fileName": "gfs.t{run}z.pgrb2b.{res}.{fhr}"
                     },
                     "pgrb2full": {
                         "resolutions": ["0p50"],
@@ -87,7 +91,8 @@ while True:
                         "minHour": 000,
                         "maxHour": 384,
                         "stepping": 3,
-                        "analysisSupport": False
+                        "analysisSupport": False,
+                        "fileName": "gfs.t{run}z.pgrb2full.{res}.{fhr}"
                     },
                     "sfc": {
                         "resolutions": None,
@@ -95,7 +100,8 @@ while True:
                         "minHour": 1,
                         "maxHour": 12,
                         "stepping": 1,
-                        "analysisSupport": True
+                        "analysisSupport": True,
+                        "fileName": "gfs.t{run}z.sfc{fhr}"
                     },
                     "sfluxgrb": {
                         "resolutions": None,
@@ -103,7 +109,8 @@ while True:
                         "minHour": 000,
                         "maxHour": 384,
                         "stepping": [1, 3],
-                        "analysisSupport": False
+                        "analysisSupport": False,
+                        "fileName": "gfs.t{run}z.sfluxgrb{fhr}"
                     },
                     "wgne": {
                         "resolutions": None,
@@ -111,7 +118,8 @@ while True:
                         "minHour": 3,
                         "maxHour": 180,
                         "stepping": 3,
-                        "analysisSupport": False
+                        "analysisSupport": False,
+                        "fileName": "gfs.t{run}s.wgne.{fhr}"
                         }
                     }
                 },
@@ -137,12 +145,12 @@ while True:
         while running:
             # This is in here to constantly update.
             currentDT = dt.datetime.now(dt.timezone.utc)
-            offset = dt.timedelta(hours=2)
+            offset = dt.timedelta(hours=3, minutes=40)
             currentLaggedDT = currentDT - offset
             currentDate = currentLaggedDT.strftime("%Y%m%d")
             currentDate = int(currentDate)
             currentTime = currentLaggedDT.strftime("%H%M")
-            
+            print(currentLaggedDT)
             # Model Selection
             while True:
                 time.sleep(1)
@@ -198,7 +206,7 @@ while True:
                 dateLimit = int(dateLimit)
                 
                 print(f'\nPlease select a date for your {modelConfig[availableModels[modelChoice]]["availableTypes"][typeChoice].upper()} {availableModels[modelChoice]} GRIB.')
-                
+                print("REMEMBER: THIS PROGRAM'S CLOCK IS SET 3.5 HOURS BEHIND TO ACCOUNT FOR PROCESSING AND UPLOAD TIME ON THE NWS'S SIDE!")
                 dateSelection = input("(YYYY-MM-DD) --> ").replace("-", "")
                 dateSelection = int(dateSelection)
                 if dateSelection > currentLaggedDate:
@@ -211,16 +219,20 @@ while True:
                 index = 0    
                 print(f'Please select a run time (UTC) for your {modelConfig[availableModels[modelChoice]]["availableTypes"][typeChoice].upper()} {availableModels[modelChoice]} GRIB.')
                 for runTime in modelConfig[availableModels[modelChoice]]["runTimes"]:
+                    if runTime > currentLaggedDT:
+                        print(f'No {modelConfig[availableModels[modelChoice]]["availableTypes"][typeChoice].upper()} {availableModels[modelChoice]} GRIBs for this run time seem to be available yet')
                     if runTime > currentDT.hour and dateSelection == currentDate:
                         break
-                    print(f'{index + 1} - {runTime:02d}00 UTC')
+                    print(f'{index + 1} - {runTime:02d}:00 UTC')
                     index += 1
                 try:
-                    timeChoice = int(input("--> ")).strip()
+                    timeChoice = int(input("--> "))
                 except ValueError:
                     print("Please enter a number.")
                     time.sleep(1)
-                
+
+            while True:
+                print("Please select a resolution.")
     except KeyboardInterrupt:
         print("\n")
         sys.exit()
