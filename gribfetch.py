@@ -31,6 +31,7 @@ while True:
         modelConfig = {
             "GFS": {
                 "baseUrl": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/",
+                "urlStructure": "gfs.{date}/{runHour}/{fileName}",
                 "availableTypes": ["atm", "pgrb2","pgrb2b", "pgrb2full", "goessimpgrb2", "sfc", "sfluxgrb", "wgne"],
                 "runTimes": [0, 6, 12, 18], # UTC
                 "archiveLimit": 9, # Days
@@ -153,8 +154,6 @@ while True:
             currentHour, currentMinute = currentDT.strftime("%H"), currentDT.strftime("%M")
             currentHour, currentMinute = int(currentHour), int(currentMinute)
             
-            
-            
             # Model Selection
             while True:
                 time.sleep(1)
@@ -205,7 +204,7 @@ while True:
             # Date, Time, and Final Selection for the main file. 
             # TODO (in the future): Optimize with pure logic selection and utilize Xarray for regional file downloading using GRIB filter.
             while True:
-                rawDateLimit = currentUnlaggedDT - dt.timedelta(modelConfig[availableModels[modelChoice]]["archiveLimit"])
+                rawDateLimit = currentDT - dt.timedelta(modelConfig[availableModels[modelChoice]]["archiveLimit"])
                 dateLimit = rawDateLimit.strftime("%Y%m%d")
                 dateLimit = int(dateLimit)
                 
