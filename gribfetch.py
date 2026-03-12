@@ -140,16 +140,21 @@ while True:
             }
         }
         
-        # User Input and Conditionals. God this took so long
+        # User Input and Conditionals. God this took so long.
         running = True
         while running:
             # This is in here to constantly update.
+            # THESE ARE ALL IN UTC TIME!
             currentDT = dt.datetime.now(dt.timezone.utc)
-            offset = dt.timedelta(hours=3, minutes=30)
             currentDate = currentDT.strftime("%Y%m%d")
             currentDate = int(currentDate)
             currentTime = currentDT.strftime("%H%M")
-            print(currentLaggedDT)
+            currentTime = int(currentTime)
+            currentHour, currentMinute = currentDT.strftime("%H"), currentDT.strftime("%M")
+            currentHour, currentMinute = int(currentHour), int(currentMinute)
+            
+            
+            
             # Model Selection
             while True:
                 time.sleep(1)
@@ -198,14 +203,14 @@ while True:
                     time.sleep(1)
 
             # Date, Time, and Final Selection for the main file. 
-            # TODO: Optimize with pure logic selection and utilize Xarray for regional file downloading using GRIB filter.
+            # TODO (in the future): Optimize with pure logic selection and utilize Xarray for regional file downloading using GRIB filter.
             while True:
-                rawDateLimit = currentLaggedDT - dt.timedelta(modelConfig[availableModels[modelChoice]]["archiveLimit"])
+                rawDateLimit = currentUnlaggedDT - dt.timedelta(modelConfig[availableModels[modelChoice]]["archiveLimit"])
                 dateLimit = rawDateLimit.strftime("%Y%m%d")
                 dateLimit = int(dateLimit)
                 
                 print(f'\nPlease select a date for your {modelConfig[availableModels[modelChoice]]["availableTypes"][typeChoice].upper()} {availableModels[modelChoice]} GRIB.')
-                print("REMEMBER: THIS PROGRAM'S CLOCK IS SET 3.5 HOURS BEHIND TO ACCOUNT FOR PROCESSING AND UPLOAD TIME ON THE NWS'S SIDE!")
+                print("REMEMBER: THE NWS TAKES ABOUT 3.5 HOURS TO UPLOAD AND PROCESS GRIB FILES!")
                 dateSelection = input("(YYYY-MM-DD) --> ").replace("-", "")
                 dateSelection = int(dateSelection)
                 if dateSelection > currentDate:
@@ -215,15 +220,17 @@ while True:
                     print("\nThe entered date is older than the archive limit")
                     print(f'The earliest accessible {availableModels[modelChoice]} GRIBs are from: {rawDateLimit.strftime("%Y-%m-%d")}')
                     time.sleep(1)
-                index = 0    
-                print(f'Please select a run time (UTC) for your {modelConfig[availableModels[modelChoice]]["availableTypes"][typeChoice].upper()} {availableModels[modelChoice]} GRIB.')
+                else:
+                    break
+
+            while True:
+                index = 0
+                print(f'\nPlease select a run time (UTC) for your {modelConfig[availableModels[modelChoice]]["availableTypes"][typeChoice].upper()} {availableModels[modelChoice]} GRIB.')
                 for runTime in modelConfig[availableModels[modelChoice]]["runTimes"]:
-                    if runTime > currentLaggedDT: # Fix this
-                        print(f'No {modelConfig[availableModels[modelChoice]]["availableTypes"][typeChoice].upper()} {availableModels[modelChoice]} GRIBs for this run time seem to be available yet')
+                    index += 1
                     if runTime > currentDT.hour and dateSelection == currentDate:
                         break
-                    print(f'{index + 1} - {runTime:02d}:00 UTC')
-                    index += 1
+                    print(f'{index} - {runTime:02d}:00 UTC')
                 try:
                     timeChoice = int(input("--> "))
                 except ValueError:
@@ -232,6 +239,8 @@ while True:
 
             while True:
                 print("Please select a resolution.")
+                for index, resolution in enumerate(modelConfig[availableModels[modelChoice]]["typeConfig"]["availableTypes"[typeChoice]]["resolutions"], start=1):
+                    print(f'{index} - {resolution}')
     except KeyboardInterrupt:
         print("\n")
         sys.exit()
