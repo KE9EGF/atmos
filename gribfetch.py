@@ -31,7 +31,7 @@ while True:
         modelConfig = {
             "GFS": {
                 "baseUrl": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/",
-                "urlStructure": "gfs.{date}/{runHour}/{fileName}",
+                "urlStructure": "gfs.{}/{}/{}", # Date, Run Time, Filename
                 "availableTypes": ["atm", "pgrb2","pgrb2b", "pgrb2full", "goessimpgrb2", "sfc", "sfluxgrb", "wgne"],
                 "runTimes": [0, 6, 12, 18], # UTC
                 "archiveLimit": 9, # Days
@@ -49,7 +49,7 @@ while True:
                         "maxHour": 12,
                         "stepping": 1,
                         "analysisSupport": True,
-                        "fileName": "gfs.t{run}z.atm{fhr}.nc"
+                        "fileName": "gfs.t{}z.atm{}.nc" # Run Time, Forecast Hour
                     },
                     "goessimpgrb2": {
                         "resolutions": ["0p25"],
@@ -58,7 +58,7 @@ while True:
                         "maxHour": 180,
                         "stepping": 3,
                         "analysisSupport": False,
-                        "fileName": "gfs.t{run}.goessimpgrb2.{res}.{fhr}"
+                        "fileName": "gfs.t{}.goessimpgrb2.{}.{}" # Run Time, Resolution, Forecast Hour
                     },
                     "pgrb2": {
                         "resolutions": ["0p25", "0p50", "1p00"],
@@ -71,7 +71,7 @@ while True:
                             "1p00": 3
                         },
                         "analysisSupport": True,
-                        "fileName": "gfs.t{run}z.pgrb2.{res}.{fhr}"
+                        "fileName": "gfs.t{}z.pgrb2.{}.{}" # Run Time, Resolution, Forecast Hour
                     },
                     "pgrb2b": {
                         "resolutions": ["0p25", "0p50", "1p00"],
@@ -84,7 +84,7 @@ while True:
                             "1p00": 3
                         },
                         "analysisSupport": True,
-                        "fileName": "gfs.t{run}z.pgrb2b.{res}.{fhr}"
+                        "fileName": "gfs.t{}z.pgrb2b.{}.{}" # Run Time, Resolution, Forecast Hour
                     },
                     "pgrb2full": {
                         "resolutions": ["0p50"],
@@ -93,7 +93,7 @@ while True:
                         "maxHour": 384,
                         "stepping": 3,
                         "analysisSupport": False,
-                        "fileName": "gfs.t{run}z.pgrb2full.{res}.{fhr}"
+                        "fileName": "gfs.t{}z.pgrb2full.{}.{}" # Run Time, Resolution, Forecast Hour
                     },
                     "sfc": {
                         "resolutions": None,
@@ -102,7 +102,7 @@ while True:
                         "maxHour": 12,
                         "stepping": 1,
                         "analysisSupport": True,
-                        "fileName": "gfs.t{run}z.sfc{fhr}"
+                        "fileName": "gfs.t{}z.sfc.{}" # Run Time, Forecast Hour
                     },
                     "sfluxgrb": {
                         "resolutions": None,
@@ -111,7 +111,7 @@ while True:
                         "maxHour": 384,
                         "stepping": [1, 3],
                         "analysisSupport": False,
-                        "fileName": "gfs.t{run}z.sfluxgrb{fhr}"
+                        "fileName": "gfs.t{}z.sfluxgrb.{}" # Run Time, Forecast Hour
                     },
                     "wgne": {
                         "resolutions": None,
@@ -120,7 +120,7 @@ while True:
                         "maxHour": 180,
                         "stepping": 3,
                         "analysisSupport": False,
-                        "fileName": "gfs.t{run}s.wgne.{fhr}"
+                        "fileName": "gfs.t{}z.wgne.{}" # Run Time, Forecast Hour
                         }
                     }
                 },
@@ -169,6 +169,7 @@ while True:
                     print(f'\nYou chose {availableModels[modelChoice]}. Is this correct?')
                     modelConfirm = input("(Y/N) --> ").strip().upper()
                     if modelConfirm == "Y" and modelConfirm.isalpha() and len(modelConfirm) == 1:
+                        model = modelConfig[availableModels[modelChoice]]
                         break
                     elif modelConfirm == "N" and modelConfirm.isalpha() and len(modelConfirm) == 1:
                         continue
@@ -193,7 +194,10 @@ while True:
                 if typeChoice >= 0 and typeChoice < len(modelConfig[availableModels[modelChoice]]["availableTypes"]):
                     print(f'\nYou chose {modelConfig[availableModels[modelChoice]]["availableTypes"][typeChoice]}. Is this correct?')
                 typeConfirm = input("(Y/N) --> ").strip().upper()
-                if typeConfirm == "Y" and typeConfirm.isalpha() and len(typeConfirm) == 1:
+                if typeConfirm == "Y" and typeConfirm.isalpha() and len(typeConfirm) == 1:\
+                    type = modelConfig[model]["availableTypes"][typeChoice]
+                    print(type)
+                    print(model)
                     break
                 elif typeConfirm == "N" and typeConfirm.isalpha() and len(typeConfirm) == 1:
                     continue
@@ -209,37 +213,48 @@ while True:
                 dateLimit = int(dateLimit)
                 
                 print(f'\nPlease select a date for your {modelConfig[availableModels[modelChoice]]["availableTypes"][typeChoice].upper()} {availableModels[modelChoice]} GRIB.')
-                print("REMEMBER: THE NWS TAKES ABOUT 3.5 HOURS TO UPLOAD AND PROCESS GRIB FILES!")
+                print("REMINDER: THE NWS TAKES ABOUT 3.5 HOURS TO UPLOAD AND PROCESS MODEL FILES!")
                 dateSelection = input("(YYYY-MM-DD) --> ").replace("-", "")
-                dateSelection = int(dateSelection)
-                if dateSelection > currentDate:
-                    print("\nSorry, we don't support fetching GRIBs from the future... yet.")
+                try:
+                    dateSelection = int(dateSelection)
+                    if dateSelection > currentDate:
+                        print("\nSorry, we don't support fetching GRIBs from the future... yet.")
+                        time.sleep(1)
+                    elif dateSelection < dateLimit:
+                        print("\nThe entered date is older than the archive limit, or is invalid.")
+                        print(f'The earliest accessible {availableModels[modelChoice]} GRIBs are from: {rawDateLimit.strftime("%Y-%m-%d")}')
+                        time.sleep(1)
+                    else:
+                        break
+                except ValueError:
+                    print("\nPlease enter a valid date.")
                     time.sleep(1)
-                elif dateSelection < dateLimit:
-                    print("\nThe entered date is older than the archive limit")
-                    print(f'The earliest accessible {availableModels[modelChoice]} GRIBs are from: {rawDateLimit.strftime("%Y-%m-%d")}')
-                    time.sleep(1)
-                else:
-                    break
 
             while True:
                 index = 0
                 print(f'\nPlease select a run time (UTC) for your {modelConfig[availableModels[modelChoice]]["availableTypes"][typeChoice].upper()} {availableModels[modelChoice]} GRIB.')
+                print("REMINDER: THE NWS TAKES ABOUT 3.5 HOURS TO UPLOAD AND PROCESS MODEL FILES!")
                 for runTime in modelConfig[availableModels[modelChoice]]["runTimes"]:
                     index += 1
-                    if runTime > currentDT.hour and dateSelection == currentDate:
+                    if runTime > currentHour and dateSelection == currentDate:
                         break
-                    print(f'{index} - {runTime:02d}:00 UTC')
+                    else:
+                        print(f'{index} - {runTime:02d}:00 UTC')
                 try:
-                    timeChoice = int(input("--> "))
+                    timeChoice = int(input("--> ")) - 1
+                    print(timeChoice)
+                    break
                 except ValueError:
                     print("Please enter a number.")
                     time.sleep(1)
 
             while True:
                 print("Please select a resolution.")
-                for index, resolution in enumerate(modelConfig[availableModels[modelChoice]]["typeConfig"]["availableTypes"[typeChoice]]["resolutions"], start=1):
+                break
+                for index, resolution in enumerate(modelConfig[availableModels[modelChoice]]["typeConfig"][modelConfig[availableModels[modelChoice]["availableTypes"][typeChoice]]["resolutions"], start=1):
                     print(f'{index} - {resolution}')
+                    
+                    
     except KeyboardInterrupt:
         print("\n")
         sys.exit()
