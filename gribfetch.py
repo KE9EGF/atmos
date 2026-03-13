@@ -169,7 +169,7 @@ while True:
                     print(f'\nYou chose {availableModels[modelChoice]}. Is this correct?')
                     modelConfirm = input("(Y/N) --> ").strip().upper()
                     if modelConfirm == "Y" and modelConfirm.isalpha() and len(modelConfirm) == 1:
-                        model = modelConfig[availableModels[modelChoice]]
+                        model = availableModels[modelChoice].upper()
                         break
                     elif modelConfirm == "N" and modelConfirm.isalpha() and len(modelConfirm) == 1:
                         continue
@@ -183,8 +183,8 @@ while True:
 
             # Type Selection        
             while True:
-                print(f'\nPlease select what type of {availableModels[modelChoice]} GRIB you want.\n')
-                for index, type in enumerate(modelConfig[availableModels[modelChoice]]["availableTypes"], start=1):
+                print(f'\nPlease select what type of {model} GRIB you want.\n')
+                for index, type in enumerate(modelConfig[model]["availableTypes"], start=1):
                     print(f'{index} - {type}')
                 try:
                     typeChoice = int(input("--> ").strip())
@@ -193,26 +193,28 @@ while True:
                 typeChoice -= 1
                 if typeChoice >= 0 and typeChoice < len(modelConfig[availableModels[modelChoice]]["availableTypes"]):
                     print(f'\nYou chose {modelConfig[availableModels[modelChoice]]["availableTypes"][typeChoice]}. Is this correct?')
-                typeConfirm = input("(Y/N) --> ").strip().upper()
-                if typeConfirm == "Y" and typeConfirm.isalpha() and len(typeConfirm) == 1:\
-                    type = modelConfig[model]["availableTypes"][typeChoice]
-                    print(type)
-                    print(model)
-                    break
-                elif typeConfirm == "N" and typeConfirm.isalpha() and len(typeConfirm) == 1:
-                    continue
+                    typeConfirm = input("(Y/N) --> ").strip().upper()
+                    if typeConfirm == "Y" and typeConfirm.isalpha() and len(typeConfirm) == 1:
+                        type = modelConfig[model]["availableTypes"][typeChoice].upper()
+                        print(type)
+                        print(model)
+                        break
+                    elif typeConfirm == "N" and typeConfirm.isalpha() and len(typeConfirm) == 1:
+                        continue
+                    else:
+                        print("\nReally? You couldn't type Y or N? Butterfingers...")
+                        time.sleep(1)
                 else:
-                    print("\nReally? You couldn't type Y or N? Butterfingers...")
-                    time.sleep(1)
+                    print("Please enter a valid option.")
 
-            # Date, Time, and Final Selection for the main file. 
+            # Date Selection
             # TODO (in the future): Optimize with pure logic selection and utilize Xarray for regional file downloading using GRIB filter.
             while True:
-                rawDateLimit = currentDT - dt.timedelta(modelConfig[availableModels[modelChoice]]["archiveLimit"])
+                rawDateLimit = currentDT - dt.timedelta(modelConfig[model]["archiveLimit"])
                 dateLimit = rawDateLimit.strftime("%Y%m%d")
                 dateLimit = int(dateLimit)
                 
-                print(f'\nPlease select a date for your {modelConfig[availableModels[modelChoice]]["availableTypes"][typeChoice].upper()} {availableModels[modelChoice]} GRIB.')
+                print(f'\nPlease select a date for your {type} {model} GRIB.')
                 print("REMINDER: THE NWS TAKES ABOUT 3.5 HOURS TO UPLOAD AND PROCESS MODEL FILES!")
                 dateSelection = input("(YYYY-MM-DD) --> ").replace("-", "")
                 try:
@@ -222,18 +224,19 @@ while True:
                         time.sleep(1)
                     elif dateSelection < dateLimit:
                         print("\nThe entered date is older than the archive limit, or is invalid.")
-                        print(f'The earliest accessible {availableModels[modelChoice]} GRIBs are from: {rawDateLimit.strftime("%Y-%m-%d")}')
+                        print(f'The earliest accessible {model} GRIBs are from: {rawDateLimit.strftime("%Y-%m-%d")}')
                         time.sleep(1)
                     else:
                         break
                 except ValueError:
                     print("\nPlease enter a valid date.")
                     time.sleep(1)
-
+                    
+            # Run Time Selection.
             while True:
                 index = 0
-                print(f'\nPlease select a run time (UTC) for your {modelConfig[availableModels[modelChoice]]["availableTypes"][typeChoice].upper()} {availableModels[modelChoice]} GRIB.')
-                print("REMINDER: THE NWS TAKES ABOUT 3.5 HOURS TO UPLOAD AND PROCESS MODEL FILES!")
+                print(f'\nPlease select a run time (UTC) for your {type} {model} GRIB.')
+                print("REMINDER: THE NWS CAN TAKE UPWARDS OF 5 HOURS AFTER THE RUN TIME TO FULLY UPLOAD FILES!")
                 for runTime in modelConfig[availableModels[modelChoice]]["runTimes"]:
                     index += 1
                     if runTime > currentHour and dateSelection == currentDate:
@@ -248,11 +251,17 @@ while True:
                     print("Please enter a number.")
                     time.sleep(1)
 
+            # Resolution Selection.
+            if len(modelConfig[model]["typeConfig"][type.lower()]["resolutions"]) == 1:
+                    print(f'\nOnly one available resolution for the {type} {model} GRIB. Selecting {modelConfig[model]["typeConfig"][type.lower()]["resolutions"][0]}°.')
+                elif modelConfig[model]["typeConfig"][type.lower()]["resolutions"] == None:
+                    print(f'\nResolution not available for the {type} {model} GRIB. This may be a .NC file. Proceeding.')
             while True:
                 print("Please select a resolution.")
-                break
-                for index, resolution in enumerate(modelConfig[availableModels[modelChoice]]["typeConfig"][modelConfig[availableModels[modelChoice]["availableTypes"][typeChoice]]["resolutions"], start=1):
-                    print(f'{index} - {resolution}')
+                for index, resolution in enumerate(modelConfig[model]["typeConfig"][type.lower()]["resolutions"][0]}, start=1):
+                    break # MAKE THIS
+                
+
                     
                     
     except KeyboardInterrupt:
