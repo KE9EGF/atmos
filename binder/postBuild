@@ -1,0 +1,6 @@
+#!/bin/bash
+
+pip install uv --break-system-packages
+uv venv atmos
+source atmos/bin/activate
+uv pip install -r binder/packages.txt
