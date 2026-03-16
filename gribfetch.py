@@ -195,9 +195,7 @@ while True:
                     print(f'\nYou chose {modelConfig[availableModels[modelChoice]]["availableTypes"][typeChoice]}. Is this correct?')
                     typeConfirm = input("(Y/N) --> ").strip().upper()
                     if typeConfirm == "Y" and typeConfirm.isalpha() and len(typeConfirm) == 1:
-                        type = modelConfig[model]["availableTypes"][typeChoice].upper()
-                        print(type)
-                        print(model)
+                        type = modelConfig[model]["availableTypes"][typeChoice]
                         break
                     elif typeConfirm == "N" and typeConfirm.isalpha() and len(typeConfirm) == 1:
                         continue
@@ -214,7 +212,7 @@ while True:
                 dateLimit = rawDateLimit.strftime("%Y%m%d")
                 dateLimit = int(dateLimit)
                 
-                print(f'\nPlease select a date for your {type} {model} GRIB.')
+                print(f'\nPlease select a date for your {type.upper()} {model} GRIB.')
                 print("REMINDER: THE NWS TAKES ABOUT 3.5 HOURS TO UPLOAD AND PROCESS MODEL FILES!")
                 dateSelection = input("(YYYY-MM-DD) --> ").replace("-", "")
                 try:
@@ -235,8 +233,8 @@ while True:
             # Run Time Selection.
             while True:
                 index = 0
-                print(f'\nPlease select a run time (UTC) for your {type} {model} GRIB.')
-                print("REMINDER: THE NWS CAN TAKE UPWARDS OF 5 HOURS AFTER THE RUN TIME TO FULLY UPLOAD FILES!")
+                print(f'\nPlease select a run time (UTC) for your {type.upper()} {model} GRIB.')
+                print("REMINDER: THE NWS CAN TAKE UPWARDS OF MULTIPLE HOURS AFTER THE RUN TIME TO FULLY UPLOAD FILES!")
                 for runTime in modelConfig[availableModels[modelChoice]]["runTimes"]:
                     index += 1
                     if runTime > currentHour and dateSelection == currentDate:
@@ -250,15 +248,18 @@ while True:
                 except ValueError:
                     print("Please enter a number.")
                     time.sleep(1)
-
-            # Resolution Selection.
-            if len(modelConfig[model]["typeConfig"][type.lower()]["resolutions"]) == 1:
-                    print(f'\nOnly one available resolution for the {type} {model} GRIB. Selecting {modelConfig[model]["typeConfig"][type.lower()]["resolutions"][0]}°.')
-                elif modelConfig[model]["typeConfig"][type.lower()]["resolutions"] == None:
-                    print(f'\nResolution not available for the {type} {model} GRIB. This may be a .NC file. Proceeding.')
+                    
+            # Resolution Selection.        
             while True:
+                if len(modelConfig[model]["typeConfig"][type]["resolutions"]) == 1:
+                    print(f'\nOnly one available resolution for the {type.upper()} {model} GRIB. Selecting {modelConfig[model]["typeConfig"][type]["resolutions"][0]}°.')
+                    break
+                elif modelConfig[model]["typeConfig"][type]["resolutions"] == None:
+                    print(f'\nResolution not available for the {type.upper()} {model} GRIB. This may be a .NC file. Proceeding.')
+                    break
                 print("Please select a resolution.")
-                for index, resolution in enumerate(modelConfig[model]["typeConfig"][type.lower()]["resolutions"][0]}, start=1):
+                for index, resolution in enumerate(modelConfig[model]["typeConfig"][type]["resolutions"][0]}, start=1):
+                    print("")
                     break # MAKE THIS
                 
 
