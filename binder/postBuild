@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pip install uv --break-system-packages
-uv venv atmos
+python3.12 -m pip install uv --break-system-packages
+python3.12 -m uv venv atmos
 source atmos/bin/activate
-uv pip install -r binder/packages.txt
+python3.12 -m uv pip install -r binder/packages.txt
