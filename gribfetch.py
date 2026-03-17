@@ -31,10 +31,11 @@ while True:
             "GFS": {
                 "baseUrl": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/",
                 "urlStructure": "gfs.{}/{}/{}", # Date, Run Time, Filename
-                "availableTypes": ["ATM", "PGRB2","PGRB2B", "PGRB2FULL", "GOESSIMPGRB2", "SFC", "SFLUXGRB", "WGNE"],
+                "availableTypes": ["ATM", "PGRB2","PGRB2B", "PGRB2FULL", "GOESSIMPGRB2", "SFC", "SFLUXGRB", "WGNE"]
                 "runTimes": [0, 6, 12, 18], # UTC
                 "archiveLimit": 9, # Days
                 "lateSteppingThreshold": 120, # Hours
+                "testFiles": ["gfs.t{}z.pgrb2.0p25.f000", "gfs.t{}z.pgrb2.0p25.f384"]
                 "typeConfig": {
                     # SFC and ATM files are stored in .NC format.
                     # .NC (NetCDF4) FILES DO NOT HAVE RESOLUTIONS!
@@ -57,7 +58,7 @@ while True:
                         "maxHour": 180,
                         "stepping": 3,
                         "analysisSupport": False,
-                        "fileName": "gfs.t{}.goessimpgrb2.{}.{}" # Run Time, Resolution, Forecast Hour
+                        "fileName": "gfs.t{}z.goessimpgrb2.{}.{}" # Run Time, Resolution, Forecast Hour
                     },
                     "PGRB2": {
                         "resolutions": ["0p25", "0p50", "1p00"],
@@ -186,10 +187,9 @@ while True:
                 for index, type in enumerate(modelConfig[model]["availableTypes"], start=1):
                     print(f'{index} - {type}')
                 try:
-                    typeChoice = int(input("--> ").strip())
+                    typeChoice = int(input("--> ").strip()) - 1
                 except ValueError:
                     print("\nPlease enter a number.")
-                typeChoice -= 1
                 if typeChoice >= 0 and typeChoice < len(modelConfig[model]["availableTypes"]):
                     print(f'\nYou chose {modelConfig[model]["availableTypes"][typeChoice]}. Is this correct?')
                     typeConfirm = input("(Y/N) --> ").strip().upper()
