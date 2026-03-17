@@ -1,4 +1,8 @@
 #!/bin/bash
 
+python3.12 -m pip install uv --break-system-packages
+python3.12 -m uv venv atmos
+source atmos/bin/activate
+uv pip install -r binder/packages.txt
 export PATH=$HOME/.local/bin:$PATH
 source atmos/bin/activate
