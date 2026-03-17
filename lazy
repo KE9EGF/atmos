@@ -1,8 +1,9 @@
 #!/bin/bash
 
-python3.12 -m pip install uv --break-system-packages || true
-python3.12 -m uv venv atmos || true
+git config --global user.name “KE9EGF”
+git config --global user.email “severett078@gmail.com”
+python3.12 -m pip install uv --break-system-packages
+python3.12 -m uv venv atmos
 source atmos/bin/activate || true
-uv pip install -r binder/packages.txt || true
-export PATH=$HOME/.local/bin:$PATH || true
-source atmos/bin/activate || true
+uv pip install -r packages.txt
+export PATH=$HOME/.local/bin:$PATH
