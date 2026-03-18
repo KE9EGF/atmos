@@ -31,11 +31,11 @@ while True:
             "GFS": {
                 "baseUrl": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/",
                 "urlStructure": "gfs.{}/{}/{}", # Date, Run Time, Filename
-                "availableTypes": ["ATM", "PGRB2","PGRB2B", "PGRB2FULL", "GOESSIMPGRB2", "SFC", "SFLUXGRB", "WGNE"]
+                "availableTypes": ["ATM", "PGRB2","PGRB2B", "PGRB2FULL", "GOESSIMPGRB2", "SFC", "SFLUXGRB", "WGNE"],
                 "runTimes": [0, 6, 12, 18], # UTC
                 "archiveLimit": 9, # Days
                 "lateSteppingThreshold": 120, # Hours
-                "testFiles": ["gfs.t{}z.pgrb2.0p25.f000", "gfs.t{}z.pgrb2.0p25.f384"]
+                "testFiles": ["gfs.t{}z.pgrb2.0p25.f000", "gfs.t{}z.pgrb2.0p25.f384"],
                 "typeConfig": {
                     # SFC and ATM files are stored in .NC format.
                     # .NC (NetCDF4) FILES DO NOT HAVE RESOLUTIONS!
@@ -156,7 +156,6 @@ while True:
             
             # Model Selection
             while True:
-                time.sleep(1)
                 print("\nPlease select what model of GRIB you would like.")
                 for index, model in enumerate(availableModels, start=1):
                     print(f'{index} - {model}')
@@ -210,14 +209,8 @@ while True:
                 dateLimit = rawDateLimit.strftime("%Y%m%d")
                 dateLimit = int(dateLimit)
                 print(f'\nPlease select a date for your {type} {model} GRIB.')
-                print("REMINDER: THE NWS TAKES ABOUT 3.5 HOURS TO UPLOAD AND PROCESS MODEL FILES!")
-                dateSelection = input("(YYYY-MM-DD) --> ")
-                try:
-                    dateSelection = int(dateSelection.replace("-", ""))
-                    print(dateSelection)
-                except ValueError:
-                    print("\nPlease enter a valid date.")
-                    time.sleep(1)
+                print("REMINDER: THE NWS CAN TAKE UPWARDS OF MULTIPLE HOURS AFTER THE RUN TIME TO FULLY UPLOAD FILES!")
+                dateSelection = int(input("(YYYY-MM-DD) --> ").replace("-","").strip())
                 if dateSelection > currentDate:
                     print("\nSorry, we don't support fetching GRIBs from the future... yet.")
                     time.sleep(1)
@@ -229,8 +222,13 @@ while True:
                     print(f'\nYou chose {dateSelection}. Is this correct?')
                     dateConfirm = input("(Y/N) --> ").strip().upper()
                     if dateConfirm == "Y":
-                        dateSelection = dateSelection # FIX THIS
-                    break
+                        date = dateSelection
+                        break
+                    elif dateConfirm == "N":
+                        continue
+                    else:
+                        print("\nReally? You couldn't type Y or N? Butterfingers...")
+                        time.sleep(1)
                     
             # Run Time Selection.
             while True:
@@ -251,7 +249,17 @@ while True:
                         continue
                     else:
                         timeChoice -= 1
-                    break
+                        print(f'\nYou chose {modelConfig[model]["runTimes"][timeChoice]:02d}:00. Is this correct?')
+                        timeConfirm = input("(Y/N) --> ").strip().upper()
+                        if timeConfirm == "Y":
+                            time = modelConfig[model]["runTimes"][timeChoice]
+                            print(timeChoice)
+                            break
+                        elif timeConfirm == "N":
+                            continue
+                        else:
+                            print("\nReally? You couldn't type Y or N? Butterfingers...")
+                            time.sleep(1)
                 except ValueError:
                     print("Please enter a number.")
                     time.sleep(1)
@@ -264,9 +272,9 @@ while True:
                 elif modelConfig[model]["typeConfig"][type]["resolutions"] == None:
                     print(f'\nResolution not available for the {type} {model} GRIB. This may be a .NC file. Proceeding.')
                     break
-                print("Please select a resolution.")
+                print("\nPlease select a resolution.")
                 for index, resolution in enumerate(modelConfig[model]["typeConfig"][type]["resolutions"], start=1):
-                    print(f'{index} - {resolution}')
+                    print(f'{index} - {resolution.replace("p", ".")}°')
                     resChoice = int(input("--> ").strip())
                     if resChoice > len(modelConfig[model]["typeConfig"][type]["resolutions"]) or resChoice <= 0:
                         print("Please select a valid resolution.")
@@ -274,13 +282,21 @@ while True:
                         continue
                     else:
                         resChoice -= 1
-                        print(f'You chose...')
-                        # Finish this
-                    break
-                
+                        print(f'\nYou chose {modelConfig[model]["typeConfig"][type]["resolutions"][resChoice].replace("p", ".")}°. Is this correct?')
+                        resConfirm = input("(Y/N) --> ").strip().upper()
+                        if resConfirm == "Y":
+                            resolution = modelConfig[model]["typeConfig"][type]["resolutions"][resChoice]
+                            print(resChoice)
+                            break
+                        elif resConfirm == "N":
+                            continue
+                        else:
+                            print("\nReally? You couldn't type Y or N? Butterfingers...")
+                            time.sleep(1)
 
-                    
-                    
+            # Forecast Hour Selection. This was by far the hardest part.
+            while True:
+                
     except KeyboardInterrupt:
         print("\n")
         sys.exit()
