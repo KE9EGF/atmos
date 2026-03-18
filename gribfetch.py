@@ -18,8 +18,8 @@ while True:
             
         # Dictionaries, Lists, Variables, and Other Crap. This took so long.
         # MAY REWRITE THIS LATER ON FOR GRIB FILTER SUPPORT!!
-        def getStepping(model, type, resolution=None):         
-            stepping = modelConfig[model][typeConfig][type][stepping]
+        def getStepping(Model, Type, resolution=None):         
+            stepping = modelConfig[model]["typeConfig"][type]["stepping"]
             if resolution is None:
                 return stepping
             else:
@@ -275,28 +275,30 @@ while True:
                 print("\nPlease select a resolution.")
                 for index, resolution in enumerate(modelConfig[model]["typeConfig"][type]["resolutions"], start=1):
                     print(f'{index} - {resolution.replace("p", ".")}°')
-                    resChoice = int(input("--> ").strip())
-                    if resChoice > len(modelConfig[model]["typeConfig"][type]["resolutions"]) or resChoice <= 0:
-                        print("Please select a valid resolution.")
-                        time.sleep(1)
+                resChoice = int(input("--> ").strip())
+                if resChoice > len(modelConfig[model]["typeConfig"][type]["resolutions"]) or resChoice <= 0:
+                    print("Please select a valid resolution.")
+                    time.sleep(1)
+                    continue
+                else:
+                    resChoice -= 1
+                    print(f'\nYou chose {modelConfig[model]["typeConfig"][type]["resolutions"][resChoice].replace("p", ".")}°. Is this correct?')
+                    resConfirm = input("(Y/N) --> ").strip().upper()
+                    if resConfirm == "Y":
+                        resolution = modelConfig[model]["typeConfig"][type]["resolutions"][resChoice]
+                        print(resolution)
+                        break
+                    elif resConfirm == "N":
                         continue
                     else:
-                        resChoice -= 1
-                        print(f'\nYou chose {modelConfig[model]["typeConfig"][type]["resolutions"][resChoice].replace("p", ".")}°. Is this correct?')
-                        resConfirm = input("(Y/N) --> ").strip().upper()
-                        if resConfirm == "Y":
-                            resolution = modelConfig[model]["typeConfig"][type]["resolutions"][resChoice]
-                            print(resChoice)
-                            break
-                        elif resConfirm == "N":
-                            continue
-                        else:
-                            print("\nReally? You couldn't type Y or N? Butterfingers...")
-                            time.sleep(1)
+                        print("\nReally? You couldn't type Y or N? Butterfingers...")
+                        time.sleep(1)
 
             # Forecast Hour Selection. This was by far the hardest part.
             while True:
-                
+                if isinstance(modelConfig[model]["typeConfig"][type]["stepping"], dict):
+                    stepping = getStepping(model, type, resolution)
+                    print(stepping)
     except KeyboardInterrupt:
         print("\n")
         sys.exit()
