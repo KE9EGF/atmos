@@ -267,7 +267,16 @@ while True:
                 print("Please select a resolution.")
                 for index, resolution in enumerate(modelConfig[model]["typeConfig"][type]["resolutions"], start=1):
                     print(f'{index} - {resolution}')
-                    break # MAKE THIS
+                    resChoice = int(input("--> ").strip())
+                    if resChoice > len(modelConfig[model]["typeConfig"][type]["resolutions"]) or resChoice <= 0:
+                        print("Please select a valid resolution.")
+                        time.sleep(1)
+                        continue
+                    else:
+                        resChoice -= 1
+                        print(f'You chose...')
+                        # Finish this
+                    break
                 
 
                     
