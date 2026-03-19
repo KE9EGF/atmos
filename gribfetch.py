@@ -26,11 +26,11 @@ while True:
             else:
                 return stepping[resolution]
 
-        def findNearestValidTime():
-            return True
-            # Make this.
-
-        
+        def findNearestValidTime(array, value):
+            array = np.asarray(array)
+            idx = (np.abs(array - value)).argmin()
+            return array[idx]
+            
         defaultGRIBType = "GRIB2"
         availableModels = ["GFS", "NAM", "HRRR", "CMC", "ARW"]
         defaultChunkSize = 1028 # kB
@@ -275,7 +275,7 @@ while True:
                 elif modelConfig[model]["typeConfig"][type]["resolutions"] == None:
                     print(f'\nResolutions are not available for the {type} {model} GRIB. This may be a .NC file. Proceeding.')
                     break
-                print("\nPlease select a resolution.")
+                print("\nSelect a resolution.")
                 for index, resolution in enumerate(modelConfig[model]["typeConfig"][type]["resolutions"], start=1):
                     print(f'{index} - {resolution.replace("p", ".")}°')
                 resChoice = int(input("--> ").strip())
@@ -308,7 +308,7 @@ while True:
             validTimes = np.array([time])
             while True:
                 if complete:
-                    print(validTimes)
+                    # Put forecast hour selection here.
                     break
                 if isinstance(modelConfig[model]["typeConfig"][type]["stepping"], dict):
                     stepping = getStepping(model, type, resolution)
@@ -331,7 +331,7 @@ while True:
                     if time >= maxHour:
                         complete = True
                         break
-                    # Finish this
+                
                         
     except KeyboardInterrupt:
         print("\n")
