@@ -32,7 +32,7 @@ while True:
             return array[idx]
             
         defaultGRIBType = "GRIB2"
-        availableModels = ["GFS", "NAM", "HRRR", "CMC", "ARW"]
+        availableModels = ["GFS", "NAM", "HRRR", "ARW"]
         defaultChunkSize = 1028 # kB
         modelConfig = {
             "GFS": {
@@ -65,7 +65,7 @@ while True:
                         "maxHour": 180,
                         "stepping": 3,
                         "analysisSupport": False,
-                        "fileName": "gfs.t{}z.goessimpgrb2.{}.{}" # Run Time, Resolution, Forecast Hour
+                        "fileName": "gfs.t{}z.goessimpgrb2.{}.f{}" # Run Time, Resolution, Forecast Hour
                     },
                     "PGRB2": {
                         "resolutions": ["0p25", "0p50", "1p00"],
@@ -78,7 +78,7 @@ while True:
                             "1p00": [3, 3]
                         },
                         "analysisSupport": True,
-                        "fileName": "gfs.t{}z.pgrb2.{}.{}" # Run Time, Resolution, Forecast Hour
+                        "fileName": "gfs.t{}z.pgrb2.{}.f{}" # Run Time, Resolution, Forecast Hour
                     },
                     "PGRB2B": {
                         "resolutions": ["0p25", "0p50", "1p00"],
@@ -91,7 +91,7 @@ while True:
                             "1p00": [3, 3]
                         },
                         "analysisSupport": True,
-                        "fileName": "gfs.t{}z.pgrb2b.{}.{}" # Run Time, Resolution, Forecast Hour
+                        "fileName": "gfs.t{}z.pgrb2b.{}.f{}" # Run Time, Resolution, Forecast Hour
                     },
                     "PGRB2FULL": {
                         "resolutions": ["0p50"],
@@ -100,7 +100,7 @@ while True:
                         "maxHour": 384,
                         "stepping": 3,
                         "analysisSupport": False,
-                        "fileName": "gfs.t{}z.pgrb2full.{}.{}" # Run Time, Resolution, Forecast Hour
+                        "fileName": "gfs.t{}z.pgrb2full.{}.f{}" # Run Time, Resolution, Forecast Hour
                     },
                     "SFC": {
                         "resolutions": None,
@@ -109,7 +109,7 @@ while True:
                         "maxHour": 12,
                         "stepping": 1,
                         "analysisSupport": True,
-                        "fileName": "gfs.t{}z.sfc.{}" # Run Time, Forecast Hour
+                        "fileName": "gfs.t{}z.sfc.f{}" # Run Time, Forecast Hour
                     },
                     "SFLUXGRB": {
                         "resolutions": None,
@@ -118,7 +118,7 @@ while True:
                         "maxHour": 384,
                         "stepping": [1, 3],
                         "analysisSupport": False,
-                        "fileName": "gfs.t{}z.sfluxgrb.{}" # Run Time, Forecast Hour
+                        "fileName": "gfs.t{}z.sfluxgrb.f{}" # Run Time, Forecast Hour
                     },
                     "WGNE": {
                         "resolutions": None,
@@ -127,7 +127,7 @@ while True:
                         "maxHour": 180,
                         "stepping": 3,
                         "analysisSupport": False,
-                        "fileName": "gfs.t{}z.wgne.{}" # Run Time, Forecast Hour
+                        "fileName": "gfs.t{}z.wgne.f{}" # Run Time, Forecast Hour
                         }
                     }
                 },
@@ -135,9 +135,6 @@ while True:
                 "baseUrl": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/nam/prod/"
             },
             "HRRR": {
-
-            },
-            "CMC": {
 
             },
             "ARW": {
@@ -308,7 +305,6 @@ while True:
             validTimes = np.array([time])
             while True:
                 if complete:
-                    # Put forecast hour selection here.
                     break
                 if isinstance(modelConfig[model]["typeConfig"][type]["stepping"], dict):
                     stepping = getStepping(model, type, resolution)
@@ -331,8 +327,28 @@ while True:
                     if time >= maxHour:
                         complete = True
                         break
+
+            while True:
+                if modelConfig[model]["typeConfig"][type]["analysisSupport"] == True:
+                    print("An ") # ANALYSIS
+                print("\nSelect a forecast hour.")
+                print("If the selected forecast hour is invalid, the closest one will be automatically selected.")
+                print(f'Minimum Hour: {minHour}')
+                print(f'Maximum Hour: {maxHour}')
+                forecastHour = input("--> ").strip()
+                try:
+                    forecastHour = input("--> ").strip()
+                except ValueError:
+                    print("Please enter a number.")
+                    time.sleep(1)
+                if forecastHour not in validTimes:
+                    nearestForecastHour = findNearestValidTime(validTimes, forecastHour)
+                    print(f'Invalid hour. Selecting forecast hour {nearestForecastHour} instead.')
+                    forecastHour = nearestForecastHour
+                elif forecastHour < 0:
+                    print("Are you serious?")
+                    time.sleep(1)
                 
-                        
     except KeyboardInterrupt:
         print("\n")
         sys.exit()
