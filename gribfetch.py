@@ -25,6 +25,12 @@ while True:
                 return stepping
             else:
                 return stepping[resolution]
+
+        def findNearestValidTime():
+            return True
+            # Make this.
+
+        
         defaultGRIBType = "GRIB2"
         availableModels = ["GFS", "NAM", "HRRR", "CMC", "ARW"]
         defaultChunkSize = 1028 # kB
@@ -40,7 +46,7 @@ while True:
                 "typeConfig": {
                     # SFC and ATM files are stored in .NC format.
                     # .NC (NetCDF4) FILES DO NOT HAVE RESOLUTIONS!
-                    # Stepping is... complicated. They vary with resolution.
+                    # Stepping is... complicated. They can vary with resolution.
                     # 1-value: [STEPPING (hours)]
                     # 2-value: [EARLY STEPPING (f<120), LATE STEPPING (f>120)]
                     "ATM": {
@@ -55,7 +61,7 @@ while True:
                     "GOESSIMPGRB2": {
                         "resolutions": ["0p25"],
                         "extension": ".grib2",
-                        "minHour": 000,
+                        "minHour": 0,
                         "maxHour": 180,
                         "stepping": 3,
                         "analysisSupport": False,
@@ -64,12 +70,12 @@ while True:
                     "PGRB2": {
                         "resolutions": ["0p25", "0p50", "1p00"],
                         "extension": ".grib2",
-                        "minHour": 000,
+                        "minHour": 0,
                         "maxHour": 384,
                         "stepping": {
                             "0p25": [1, 3],
-                            "0p50": 3,
-                            "1p00": 3
+                            "0p50": [3, 3],
+                            "1p00": [3, 3]
                         },
                         "analysisSupport": True,
                         "fileName": "gfs.t{}z.pgrb2.{}.{}" # Run Time, Resolution, Forecast Hour
@@ -77,12 +83,12 @@ while True:
                     "PGRB2B": {
                         "resolutions": ["0p25", "0p50", "1p00"],
                         "extension": ".grib2",
-                        "minHour": 000,
+                        "minHour": 0,
                         "maxHour": 384,
                         "stepping": {
                             "0p25": [1, 3],
-                            "0p50": 3,
-                            "1p00": 3
+                            "0p50": [3, 3],
+                            "1p00": [3, 3]
                         },
                         "analysisSupport": True,
                         "fileName": "gfs.t{}z.pgrb2b.{}.{}" # Run Time, Resolution, Forecast Hour
@@ -90,7 +96,7 @@ while True:
                     "PGRB2FULL": {
                         "resolutions": ["0p50"],
                         "extension": ".grib2",
-                        "minHour": 000,
+                        "minHour": 0,
                         "maxHour": 384,
                         "stepping": 3,
                         "analysisSupport": False,
@@ -304,21 +310,27 @@ while True:
                 if complete:
                     print(validTimes)
                     break
+                if isinstance(modelConfig[model]["typeConfig"][type]["stepping"], dict):
+                    stepping = getStepping(model, type, resolution)
+                    np.append(validTimes, time)
+                    while True:
+                        time += stepping[0]
+                        validTimes = np.append(validTimes, time)
+                        if time >= lateSteppingThreshold:
+                            break
+                    while True:
+                        time += stepping[1]
+                        validTimes = np.append(validTimes, time)
+                        if time >= maxHour:
+                            complete = True
+                            break
                 else:
-                    if isinstance(modelConfig[model]["typeConfig"][type]["stepping"], dict):
-                        stepping = getStepping(model, type, resolution)
-                        np.append(validTimes, time)
-                        while True:
-                            time += stepping[0]
-                            validTimes = np.append(validTimes, time)
-                            if time >= lateSteppingThreshold:
-                                break
-                        while True:
-                            time += stepping[1]
-                            validTimes = np.append(validTimes, time)
-                            if time >= maxHour:
-                                complete = True
-                                break
+                    stepping = getStepping(model, type)
+                    time += stepping
+                    validTimes = np.append(validTimes, time)
+                    if time >= maxHour:
+                        complete = True
+                        break
                     # Finish this
                         
     except KeyboardInterrupt:
