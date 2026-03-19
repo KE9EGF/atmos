@@ -1,3 +1,6 @@
+# TODO: Add support for regions outside of CONUS.
+# TODO: Add models: RAP, NBM, AIGFS, HIRESW.
+# TODO: Add file testing with requests to make sure if NWS has uploaded files.
 while True:
     # Packages, I probably couldn't live without them.
     try:
@@ -18,7 +21,6 @@ while True:
             sys.exit()
             
         # Dictionaries, Lists, Variables, and Other Crap. This took so long.
-        # MAY REWRITE THIS LATER ON FOR GRIB FILTER SUPPORT!!
         def getStepping(Model, Type, resolution=None):         
             stepping = modelConfig[model]["typeConfig"][type]["stepping"]
             if resolution is None:
@@ -330,7 +332,16 @@ while True:
 
             while True:
                 if modelConfig[model]["typeConfig"][type]["analysisSupport"] == True:
-                    print("An ") # ANALYSIS
+                    print("\nYour selected type allows you do download an analysis file. Would you like to do that?")
+                    analysisConfirm = input("(Y/N) --> ").strip().upper()
+                    if analysisConfirm == "Y":
+                        anlSelected = True
+                        break
+                    elif analysisConfirm == "N":
+                        continue
+                    else:
+                        print("\nReally? You couldn't type Y or N? Butterfingers...")
+                        time.sleep(1)
                 print("\nSelect a forecast hour.")
                 print("If the selected forecast hour is invalid, the closest one will be automatically selected.")
                 print(f'Minimum Hour: {minHour}')
@@ -348,7 +359,17 @@ while True:
                 elif forecastHour < 0:
                     print("Are you serious?")
                     time.sleep(1)
-                
+                print(f'\nYou chose forecast hour {forecastHour}. Is this correct?')
+                fhrConfirm = input("(Y/N) --> ").strip().upper()
+                if fhrConfirm == "Y":
+                    break
+                elif fhrConfirm == "N":
+                    continue
+                else:
+                    print("\nReally? You couldn't type Y or N? Butterfingers...")
+                    time.sleep(1)
+
+                # FINISH THE FILE SELECTION
     except KeyboardInterrupt:
         print("\n")
         sys.exit()
