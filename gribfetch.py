@@ -4,11 +4,12 @@ while True:
         try:
             import sys
             import os
-            import requests as rq
             import time
             import tqdm
+            import requests as rq
             import xarray as xa
             import datetime as dt
+            import numpy as np
             from tqdm import tqdm
         except ImportError as e:
             print("Error: Missing required library.")
@@ -25,7 +26,7 @@ while True:
             else:
                 return stepping[resolution]
         defaultGRIBType = "GRIB2"
-        availableModels = ["GFS", "ECMWF", "NAM", "HRRR", "CMC", "ARW"]
+        availableModels = ["GFS", "NAM", "HRRR", "CMC", "ARW"]
         defaultChunkSize = 1028 # kB
         modelConfig = {
             "GFS": {
@@ -124,9 +125,6 @@ while True:
                         }
                     }
                 },
-            "ECMWF": {
-            
-            },
             "NAM": {
                 "baseUrl": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/nam/prod/"
             },
@@ -156,7 +154,7 @@ while True:
             
             # Model Selection
             while True:
-                print("\nPlease select what model of GRIB you would like.")
+                print("\nSelect what model of GRIB you would like.")
                 for index, model in enumerate(availableModels, start=1):
                     print(f'{index} - {model}')
                 try:
@@ -182,7 +180,7 @@ while True:
 
             # Type Selection        
             while True:
-                print(f'\nPlease select what type of {model} GRIB you want.\n')
+                print(f'\nSelect what type of {model} GRIB you want.\n')
                 for index, type in enumerate(modelConfig[model]["availableTypes"], start=1):
                     print(f'{index} - {type}')
                 try:
@@ -208,8 +206,7 @@ while True:
                 rawDateLimit = currentDT - dt.timedelta(modelConfig[model]["archiveLimit"])
                 dateLimit = rawDateLimit.strftime("%Y%m%d")
                 dateLimit = int(dateLimit)
-                print(f'\nPlease select a date for your {type} {model} GRIB.')
-                print("REMINDER: THE NWS CAN TAKE UPWARDS OF MULTIPLE HOURS AFTER THE RUN TIME TO FULLY UPLOAD FILES!")
+                print(f'\nSelect a date for your {type} {model} GRIB.')
                 dateSelection = int(input("(YYYY-MM-DD) --> ").replace("-","").strip())
                 if dateSelection > currentDate:
                     print("\nSorry, we don't support fetching GRIBs from the future... yet.")
@@ -267,10 +264,10 @@ while True:
             # Resolution Selection.        
             while True:
                 if len(modelConfig[model]["typeConfig"][type]["resolutions"]) == 1:
-                    print(f'\nOnly one available resolution for the {type} {model} GRIB. Selecting {modelConfig[model]["typeConfig"][type]["resolutions"][0]}°.')
+                    print(f'\nOnly one available resolution for the {type} {model} GRIB. Selecting {modelConfig[model]["typeConfig"][type]["resolutions"][0].replace("p", ".")}°.')
                     break
                 elif modelConfig[model]["typeConfig"][type]["resolutions"] == None:
-                    print(f'\nResolution not available for the {type} {model} GRIB. This may be a .NC file. Proceeding.')
+                    print(f'\nResolutions are not available for the {type} {model} GRIB. This may be a .NC file. Proceeding.')
                     break
                 print("\nPlease select a resolution.")
                 for index, resolution in enumerate(modelConfig[model]["typeConfig"][type]["resolutions"], start=1):
@@ -294,11 +291,36 @@ while True:
                         print("\nReally? You couldn't type Y or N? Butterfingers...")
                         time.sleep(1)
 
-            # Forecast Hour Selection. This was by far the hardest part.
+            # Forecast Hour Selection. This was by far the hardest part to figure out.
+            # Yes, I'm using a NumPy array so I can efficiently round entered times
+            # to the nearest valid time in the array, cry about it.
+            complete = False
+            minHour = modelConfig[model]["typeConfig"][type]["minHour"]
+            maxHour = modelConfig[model]["typeConfig"][type]["maxHour"]
+            time = minHour
+            lateSteppingThreshold = modelConfig[model]["lateSteppingThreshold"]
+            validTimes = np.array([time])
             while True:
-                if isinstance(modelConfig[model]["typeConfig"][type]["stepping"], dict):
-                    stepping = getStepping(model, type, resolution)
-                    print(stepping)
+                if complete:
+                    print(validTimes)
+                    break
+                else:
+                    if isinstance(modelConfig[model]["typeConfig"][type]["stepping"], dict):
+                        stepping = getStepping(model, type, resolution)
+                        np.append(validTimes, time)
+                        while True:
+                            time += stepping[0]
+                            validTimes = np.append(validTimes, time)
+                            if time >= lateSteppingThreshold:
+                                break
+                        while True:
+                            time += stepping[1]
+                            validTimes = np.append(validTimes, time)
+                            if time >= maxHour:
+                                complete = True
+                                break
+                    # Finish this
+                        
     except KeyboardInterrupt:
         print("\n")
         sys.exit()
