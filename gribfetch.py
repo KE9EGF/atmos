@@ -7,12 +7,12 @@ while True:
         try:
             import sys
             import os
-            import time
             import tqdm
             import requests as rq
             import xarray as xa
             import datetime as dt
             import numpy as np
+            from time import sleep
             from tqdm import tqdm
         except ImportError as e:
             print("Error: Missing required library.")
@@ -93,7 +93,7 @@ while True:
                             "1p00": [3, 3]
                         },
                         "analysisSupport": True,
-                        "fileName": "gfs.t{}z.pgrb2b.{}.f{}" # Run Time, Resolution, Forecast Hour
+                        "fileName": "gfs.t{runTime}z.pgrb2b.{resolution}.f{forecastHour}" # Run Time, Resolution, Forecast Hour
                     },
                     "PGRB2FULL": {
                         "resolutions": ["0p50"],
@@ -177,10 +177,10 @@ while True:
                         continue
                     else:
                         print("\nReally? You couldn't type Y or N? Butterfingers...")
-                        time.sleep(1)
+                        sleep(1)
                 else:
                     print("\nPlease select a valid option.")
-                    time.sleep(1)
+                    sleep(1)
                     continue
 
             # Type Selection        
@@ -202,7 +202,7 @@ while True:
                         continue
                     else:
                         print("\nReally? You couldn't type Y or N? Butterfingers...")
-                        time.sleep(1)
+                        sleep(1)
                 else:
                     print("Please enter a valid option.")
 
@@ -215,11 +215,11 @@ while True:
                 dateSelection = int(input("(YYYY-MM-DD) --> ").replace("-","").strip())
                 if dateSelection > currentDate:
                     print("\nSorry, we don't support fetching GRIBs from the future... yet.")
-                    time.sleep(1)
+                    sleep(1)
                 elif dateSelection < dateLimit:
                     print("\nThe entered date is older than the archive limit, or is invalid.")
                     print(f'The earliest accessible {model} GRIBs are from: {rawDateLimit.strftime("%Y-%m-%d")}')
-                    time.sleep(1)
+                    sleep(1)
                 else:
                     print(f'\nYou chose {dateSelection}. Is this correct?')
                     dateConfirm = input("(Y/N) --> ").strip().upper()
@@ -230,7 +230,7 @@ while True:
                         continue
                     else:
                         print("\nReally? You couldn't type Y or N? Butterfingers...")
-                        time.sleep(1)
+                        sleep(1)
                     
             # Run Time Selection.
             while True:
@@ -247,24 +247,24 @@ while True:
                     timeChoice = int(input("--> "))
                     if timeChoice > index or timeChoice < 0:
                         print("\nPlease select a valid time.")
-                        time.sleep(1)
+                        sleep(1)
                         continue
                     else:
                         timeChoice -= 1
                         print(f'\nYou chose {modelConfig[model]["runTimes"][timeChoice]:02d}:00. Is this correct?')
                         timeConfirm = input("(Y/N) --> ").strip().upper()
                         if timeConfirm == "Y":
-                            time = modelConfig[model]["runTimes"][timeChoice]
-                            print(timeChoice)
+                            runTime = f'{modelConfig[model]["runTimes"][timeChoice]:02d}'
+                            print(runTime)
                             break
                         elif timeConfirm == "N":
                             continue
                         else:
                             print("\nReally? You couldn't type Y or N? Butterfingers...")
-                            time.sleep(1)
+                            sleep(1)
                 except ValueError:
                     print("Please enter a number.")
-                    time.sleep(1)
+                    sleep(1)
                     
             # Resolution Selection.        
             while True:
@@ -277,10 +277,14 @@ while True:
                 print("\nSelect a resolution.")
                 for index, resolution in enumerate(modelConfig[model]["typeConfig"][type]["resolutions"], start=1):
                     print(f'{index} - {resolution.replace("p", ".")}°')
-                resChoice = int(input("--> ").strip())
+                try:
+                    resChoice = int(input("--> ").strip())
+                except ValueError:
+                    print("\nPlease enter a number.")
+                    sleep(1)
                 if resChoice > len(modelConfig[model]["typeConfig"][type]["resolutions"]) or resChoice <= 0:
-                    print("Please select a valid resolution.")
-                    time.sleep(1)
+                    print("\nPlease select a valid resolution.")
+                    sleep(1)
                     continue
                 else:
                     resChoice -= 1
@@ -294,7 +298,7 @@ while True:
                         continue
                     else:
                         print("\nReally? You couldn't type Y or N? Butterfingers...")
-                        time.sleep(1)
+                        sleep(1)
 
             # Forecast Hour Selection. This was by far the hardest part to figure out.
             # Yes, I'm using a NumPy array so I can efficiently round entered times
@@ -329,7 +333,6 @@ while True:
                     if time >= maxHour:
                         complete = True
                         break
-
             while True:
                 if modelConfig[model]["typeConfig"][type]["analysisSupport"] == True:
                     print("\nYour selected type allows you do download an analysis file. Would you like to do that?")
@@ -338,38 +341,44 @@ while True:
                         anlSelected = True
                         break
                     elif analysisConfirm == "N":
+                        anlSelected = False
+                        break
+                    else:
+                        print("\nReally? You couldn't type Y or N? Butterfingers...")
+                        sleep(1)    
+            while True:
+                if anlSelected == True:
+                    break
+                else:
+                    print("\nSelect a forecast hour.")
+                    print("If the selected forecast hour is invalid, the closest one will be automatically selected.")
+                    print(f'Minimum Hour: {minHour}')
+                    print(f'Maximum Hour: {maxHour}')
+                    try:
+                        forecastHour = int(input("--> ").strip())
+                    except ValueError:
+                        print("Please enter a number.")
+                        sleep(1)
+                    if forecastHour not in validTimes:
+                        nearestForecastHour = findNearestValidTime(validTimes, forecastHour)
+                        print(f'Invalid hour. Selecting forecast hour {nearestForecastHour} instead.')
+                        forecastHour = nearestForecastHour
+                    elif forecastHour < 0:
+                        print("Are you serious?")
+                        sleep(1)
+                    print(f'\nYou chose forecast hour {forecastHour}. Is this correct?')
+                    fhrConfirm = input("(Y/N) --> ").strip().upper()
+                    if fhrConfirm == "Y":
+                        print(modelConfig[model]["typeConfig"][type]["fileName"].format(runTime, resolution, forecastHour))
+                        break
+                    elif fhrConfirm == "N":
                         continue
                     else:
                         print("\nReally? You couldn't type Y or N? Butterfingers...")
-                        time.sleep(1)
-                print("\nSelect a forecast hour.")
-                print("If the selected forecast hour is invalid, the closest one will be automatically selected.")
-                print(f'Minimum Hour: {minHour}')
-                print(f'Maximum Hour: {maxHour}')
-                forecastHour = input("--> ").strip()
-                try:
-                    forecastHour = input("--> ").strip()
-                except ValueError:
-                    print("Please enter a number.")
-                    time.sleep(1)
-                if forecastHour not in validTimes:
-                    nearestForecastHour = findNearestValidTime(validTimes, forecastHour)
-                    print(f'Invalid hour. Selecting forecast hour {nearestForecastHour} instead.')
-                    forecastHour = nearestForecastHour
-                elif forecastHour < 0:
-                    print("Are you serious?")
-                    time.sleep(1)
-                print(f'\nYou chose forecast hour {forecastHour}. Is this correct?')
-                fhrConfirm = input("(Y/N) --> ").strip().upper()
-                if fhrConfirm == "Y":
-                    break
-                elif fhrConfirm == "N":
-                    continue
-                else:
-                    print("\nReally? You couldn't type Y or N? Butterfingers...")
-                    time.sleep(1)
-
-                # FINISH THE FILE SELECTION
+                        sleep(1)
+                    # FINISH THE FILE SELECTION
     except KeyboardInterrupt:
         print("\n")
         sys.exit()
+
+
