@@ -1,4 +1,3 @@
-# TODO: Add support for regions outside of CONUS.
 # TODO: Add models: RAP, NBM, AIGFS, HIRESW.
 # TODO: Add file testing with requests to make sure if NWS has uploaded files.
 while True:
@@ -34,7 +33,7 @@ while True:
             return array[idx]
             
         defaultGRIBType = "GRIB2"
-        availableModels = ["GFS", "NAM", "HRRR", "ARW"]
+        availableModels = ["GFS", "NAM", "HRRR", "RAP", "HiResW", "AIGFS", "NBM"]
         defaultChunkSize = 1028 # kB
         modelConfig = {
             "GFS": {
@@ -43,7 +42,7 @@ while True:
                 "availableTypes": ["ATM", "PGRB2","PGRB2B", "PGRB2FULL", "GOESSIMPGRB2", "SFC", "SFLUXGRB", "WGNE"],
                 "runTimes": [0, 6, 12, 18], # UTC
                 "archiveLimit": 9, # Days
-                "lateSteppingThreshold": 120, # Hours
+                "steppingThresholds": [120] # Hours
                 "testFiles": ["gfs.t{}z.pgrb2.0p25.f000", "gfs.t{}z.pgrb2.0p25.f384"],
                 "typeConfig": {
                     # SFC and ATM files are stored in .NC format.
@@ -116,7 +115,7 @@ while True:
                     "SFLUXGRB": {
                         "resolutions": None,
                         "extension": ".grib2",
-                        "minHour": 000,
+                        "minHour": 0,
                         "maxHour": 384,
                         "stepping": [1, 3],
                         "analysisSupport": False,
@@ -139,8 +138,23 @@ while True:
             "HRRR": {
 
             },
-            "ARW": {
+            "RAP": {
 
+            },
+            "HIRESW": {
+                
+            },
+            "NBM": {
+                
+            },
+            "AIGFS": {
+                "baseUrl": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/aigfs/prod/",
+                "urlStructure": "aigfs.{}.{}.{}", # Date, Run Time, Filename
+                "availableTypes": ["PRES", "SFC"],
+                "runTimes": [0, 6, 12, 18], # UTC
+                "archiveLimit": 9, # Days
+                "lateSteppingThreshold": None
+                "
             }
         }
         
@@ -307,7 +321,7 @@ while True:
             minHour = modelConfig[model]["typeConfig"][type]["minHour"]
             maxHour = modelConfig[model]["typeConfig"][type]["maxHour"]
             time = minHour
-            lateSteppingThreshold = modelConfig[model]["lateSteppingThreshold"]
+            thresholdIndex = 0
             validTimes = np.array([time])
             while True:
                 if complete:
@@ -315,16 +329,8 @@ while True:
                 if isinstance(modelConfig[model]["typeConfig"][type]["stepping"], dict):
                     stepping = getStepping(model, type, resolution)
                     np.append(validTimes, time)
-                    while True:
-                        time += stepping[0]
-                        validTimes = np.append(validTimes, time)
-                        if time >= lateSteppingThreshold:
-                            break
-                    while True:
-                        time += stepping[1]
-                        validTimes = np.append(validTimes, time)
-                        if time >= maxHour:
-                            complete = True
+                    for threshold in modelConfig[model]["steppingThresholds"]:
+                        while True:
                             break
                 else:
                     stepping = getStepping(model, type)
@@ -360,9 +366,8 @@ while True:
                         print("Please enter a number.")
                         sleep(1)
                     if forecastHour not in validTimes:
-                        nearestForecastHour = findNearestValidTime(validTimes, forecastHour)
-                        print(f'Invalid hour. Selecting forecast hour {nearestForecastHour} instead.')
-                        forecastHour = nearestForecastHour
+                        forecastHour = findNearestValidTime(validTimes, forecastHour)
+                        print(f'Invalid hour. Selecting forecast hour {forecastHour} instead.')
                     elif forecastHour < 0:
                         print("Are you serious?")
                         sleep(1)
