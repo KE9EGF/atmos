@@ -1,3 +1,0 @@
-#!bin/bash
-
-mamba install -y rich colorama tqdm
