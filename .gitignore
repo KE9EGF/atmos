@@ -1,5 +1,2 @@
-atmos/
-.*
-!.gitignore
-!.ipython
-!.jupyter
+
+.git .gitignore .ipynb_checkpoints .local
