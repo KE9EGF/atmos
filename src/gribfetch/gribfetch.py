@@ -1,5 +1,6 @@
 # TODO: Add models: RAP, NBM, AIGFS, HIRESW.
 # TODO: Add file testing with requests to make sure if NWS has uploaded files.
+# TODO: oh my god just FIX THE DAMN HOUR SELECTION ALREADY ILULVG@WGHOFHUGV@HUIHURGBFG
 while True:
     # Packages, I probably couldn't live without them.
     try:
@@ -26,7 +27,7 @@ while True:
                 return stepping
             else:
                 return stepping[Resolution]
-
+        
         def findNearestValidTime(array, value):
             array = np.asarray(array)
             idx = (np.abs(array - value)).argmin()
@@ -55,7 +56,7 @@ while True:
                         "extension": ".nc",
                         "minHour": 0,
                         "maxHour": 12,
-                        "stepping": 1,
+                        "stepping": [1],
                         "analysisSupport": True,
                         "fileName": "gfs.t{}z.atm{}.nc" # Run Time, Forecast Hour
                     },
@@ -64,7 +65,7 @@ while True:
                         "extension": ".grib2",
                         "minHour": 0,
                         "maxHour": 180,
-                        "stepping": 3,
+                        "stepping": [3],
                         "analysisSupport": False,
                         "fileName": "gfs.t{}z.goessimpgrb2.{}.f{}" # Run Time, Resolution, Forecast Hour
                     },
@@ -99,7 +100,7 @@ while True:
                         "extension": ".grib2",
                         "minHour": 0,
                         "maxHour": 384,
-                        "stepping": 3,
+                        "stepping": [3],
                         "analysisSupport": False,
                         "fileName": "gfs.t{}z.pgrb2full.{}.f{}" # Run Time, Resolution, Forecast Hour
                     },
@@ -108,7 +109,7 @@ while True:
                         "extension": ".nc",
                         "minHour": 1,
                         "maxHour": 12,
-                        "stepping": 1,
+                        "stepping": [1],
                         "analysisSupport": True,
                         "fileName": "gfs.t{}z.sfc.f{}" # Run Time, Forecast Hour
                     },
@@ -126,7 +127,7 @@ while True:
                         "extension": ".grib2",
                         "minHour": 3,
                         "maxHour": 180,
-                        "stepping": 3,
+                        "stepping": [3],
                         "analysisSupport": False,
                         "fileName": "gfs.t{}z.wgne.f{}" # Run Time, Forecast Hour
                         }
@@ -238,7 +239,11 @@ while True:
                 dateLimit = rawDateLimit.strftime("%Y%m%d")
                 dateLimit = int(dateLimit)
                 print(f'\nSelect a date for your {type} {model} GRIB.')
-                dateSelection = int(input("(YYYY-MM-DD) --> ").replace("-","").strip())
+                try:
+                    dateSelection = int(input("(YYYY-MM-DD) --> ").replace("-","").strip())
+                except ValueError:
+                    print("Please enter a date as YYYYMMDD or YYYY-MM-DD")
+                    sleep(1)
                 if dateSelection > currentDate:
                     print("\nSorry, we don't support fetching GRIBs from the future... yet.")
                     sleep(1)
@@ -262,7 +267,7 @@ while True:
             while True:
                 index = 0
                 print(f'\nPlease select a run time (UTC) for your {type} {model} GRIB.')
-                print("REMINDER: THE NWS CAN TAKE UPWARDS OF MULTIPLE HOURS AFTER THE RUN TIME TO FULLY UPLOAD FILES!")
+                print("REMINDER: THE NWS CAN TAKE SEVERAL HOURS AFTER A RUN TO FULLY UPLOAD FILES!")
                 for runTime in modelConfig[model]["runTimes"]:
                     if runTime > currentHour and dateSelection == currentDate:
                         break
@@ -333,23 +338,25 @@ while True:
             minHour = modelConfig[model]["typeConfig"][type]["minHour"]
             maxHour = modelConfig[model]["typeConfig"][type]["maxHour"]
             time = minHour
-            thresholdIndex = 0
             steppingIndex = 0
             validTimes = np.array([time])
             while True:
-                if complete:
-                    break
                 if isinstance(modelConfig[model]["typeConfig"][type]["stepping"], dict):
                     np.append(validTimes, time)
                     for threshold in modelConfig[model]["steppingThresholds"]:
+                        if complete:
+                            break
                         while True:
-                            stepping = getStepping(model, type, resolution, steppingIndex)
+                            stepping = getStepping(model, type, resolution)
+                            if steppingIndex > len(stepping):
+                                complete = True
+                                break
                             time += stepping[steppingIndex]
                             np.append(validTimes, time)
                             if time >= threshold:
+                                print(validTimes)
                                 steppingIndex += 1
                                 break
-                        break
                 else:
                     stepping = getStepping(model, type)
                     time += stepping
