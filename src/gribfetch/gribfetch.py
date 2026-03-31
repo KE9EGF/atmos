@@ -20,12 +20,12 @@ while True:
             sys.exit()
             
         # Dictionaries, Lists, Variables, and Other Crap. This took so long.
-        def getStepping(Model, Type, resolution=None, index=0):         
+        def getStepping(Model, Type, Resolution=None):         
             stepping = modelConfig[model]["typeConfig"][type]["stepping"]
-            if resolution is None:
+            if Resolution is None:
                 return stepping
             else:
-                return stepping[resolution]
+                return stepping[Resolution]
 
         def findNearestValidTime(array, value):
             array = np.asarray(array)
@@ -175,49 +175,62 @@ while True:
                 print("\nSelect what model of GRIB you would like.")
                 for index, model in enumerate(availableModels, start=1):
                     print(f'{index} - {model}')
-                try:
-                    modelChoice = int(input("--> ").strip())
-                except ValueError:
+                modelChoice = input("--> ").strip()
+                if not modelChoice:
                     print("\nPlease enter a number.")
-                modelChoice -= 1
-                if modelChoice >= 0 and modelChoice <= len(availableModels):
-                    print(f'\nYou chose {availableModels[modelChoice]}. Is this correct?')
-                    modelConfirm = input("(Y/N) --> ").strip().upper()
-                    if modelConfirm == "Y":
-                        model = availableModels[modelChoice].upper()
-                        break
-                    elif modelConfirm == "N":
-                        continue
-                    else:
-                        print("\nReally? You couldn't type Y or N? Butterfingers...")
-                        sleep(1)
-                else:
-                    print("\nPlease select a valid option.")
                     sleep(1)
-                    continue
-
+                else:
+                    try:
+                        int(modelChoice)
+                    except ValueError:
+                        print("\nPlease enter a number.")
+                    modelChoice = int(modelChoice)
+                    modelChoice -= 1
+                    if modelChoice >= 0 and modelChoice <= len(availableModels):
+                        print(f'\nYou chose {availableModels[modelChoice]}. Is this correct?')
+                        modelConfirm = input("(Y/N) --> ").strip().upper()
+                        if modelConfirm == "Y":
+                            model = availableModels[modelChoice].upper()
+                            break
+                        elif modelConfirm == "N":
+                            continue
+                        else:
+                            print("\nReally? You couldn't type Y or N? Butterfingers...")
+                            sleep(1)
+                    else:
+                        print("\nPlease select a valid option.")
+                        sleep(1)
+                        continue
+    
             # Type Selection        
             while True:
                 print(f'\nSelect what type of {model} GRIB you want.\n')
                 for index, type in enumerate(modelConfig[model]["availableTypes"], start=1):
                     print(f'{index} - {type}')
-                try:
-                    typeChoice = int(input("--> ").strip()) - 1
-                except ValueError:
+                typeChoice = input("--> ").strip()
+                if not typeChoice:
                     print("\nPlease enter a number.")
-                if typeChoice >= 0 and typeChoice < len(modelConfig[model]["availableTypes"]):
-                    print(f'\nYou chose {modelConfig[model]["availableTypes"][typeChoice]}. Is this correct?')
-                    typeConfirm = input("(Y/N) --> ").strip().upper()
-                    if typeConfirm == "Y":
-                        type = modelConfig[model]["availableTypes"][typeChoice]
-                        break
-                    elif typeConfirm == "N":
-                        continue
-                    else:
-                        print("\nReally? You couldn't type Y or N? Butterfingers...")
-                        sleep(1)
+                    sleep(1)
                 else:
-                    print("Please enter a valid option.")
+                    try:
+                        int(typeChoice)
+                    except ValueError:
+                        print("\nPlease enter a number.")
+                    typeChoice = int(typeChoice)
+                    typeChoice -= 1
+                    if typeChoice >= 0 and typeChoice < len(modelConfig[model]["availableTypes"]):
+                        print(f'\nYou chose {modelConfig[model]["availableTypes"][typeChoice]}. Is this correct?')
+                        typeConfirm = input("(Y/N) --> ").strip().upper()
+                        if typeConfirm == "Y":
+                            type = modelConfig[model]["availableTypes"][typeChoice]
+                            break
+                        elif typeConfirm == "N":
+                            continue
+                        else:
+                            print("\nReally? You couldn't type Y or N? Butterfingers...")
+                            sleep(1)
+                    else:
+                        print("Please enter a valid option.")
 
             # Date Selection
             while True:
@@ -281,11 +294,11 @@ while True:
                     
             # Resolution Selection.        
             while True:
-                if len(modelConfig[model]["typeConfig"][type]["resolutions"]) == 1:
-                    print(f'\nOnly one available resolution for the {type} {model} GRIB. Selecting {modelConfig[model]["typeConfig"][type]["resolutions"][0].replace("p", ".")}°.')
-                    break
-                elif modelConfig[model]["typeConfig"][type]["resolutions"] == None:
+                if modelConfig[model]["typeConfig"][type]["resolutions"] == None:
                     print(f'\nResolutions are not available for the {type} {model} GRIB. This may be a .NC file. Proceeding.')
+                    break
+                elif len(modelConfig[model]["typeConfig"][type]["resolutions"]) == 1:
+                    print(f'\nOnly one available resolution for the {type} {model} GRIB. Selecting {modelConfig[model]["typeConfig"][type]["resolutions"][0].replace("p", ".")}°.')
                     break
                 print("\nSelect a resolution.")
                 for index, resolution in enumerate(modelConfig[model]["typeConfig"][type]["resolutions"], start=1):
@@ -331,9 +344,12 @@ while True:
                     for threshold in modelConfig[model]["steppingThresholds"]:
                         while True:
                             stepping = getStepping(model, type, resolution, steppingIndex)
-                            # gotta finish this
-                            time += 
-                            break
+                            time += stepping[steppingIndex]
+                            np.append(validTimes, time)
+                            if time >= threshold:
+                                steppingIndex += 1
+                                break
+                        break
                 else:
                     stepping = getStepping(model, type)
                     time += stepping
