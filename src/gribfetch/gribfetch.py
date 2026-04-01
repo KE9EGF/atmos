@@ -1,6 +1,6 @@
 # TODO: Add models: RAP, NBM, AIGFS, HIRESW.
 # TODO: Add file testing with requests to make sure if NWS has uploaded files.
-# TODO: oh my god just FIX THE DANG HOUR SELECTION ALREADY ILULVG@WGHOFHUGV@HUIHURGBFG
+# TODO: Make date confirmation readable by slicing dateSelection.
 while True:
     # Packages, I probably couldn't live without them.
     try:
@@ -252,6 +252,8 @@ while True:
                     print(f'The earliest accessible {model} GRIBs are from: {rawDateLimit.strftime("%Y-%m-%d")}')
                     sleep(1)
                 else:
+                    dateSelection = str(dateSelection)
+                    year
                     print(f'\nYou chose {dateSelection}. Is this correct?')
                     dateConfirm = input("(Y/N) --> ").strip().upper()
                     if dateConfirm == "Y":
@@ -286,7 +288,6 @@ while True:
                         timeConfirm = input("(Y/N) --> ").strip().upper()
                         if timeConfirm == "Y":
                             runTime = f'{modelConfig[model]["runTimes"][timeChoice]:02d}'
-                            print(runTime)
                             break
                         elif timeConfirm == "N":
                             continue
@@ -323,7 +324,6 @@ while True:
                     resConfirm = input("(Y/N) --> ").strip().upper()
                     if resConfirm == "Y":
                         resolution = modelConfig[model]["typeConfig"][type]["resolutions"][resChoice]
-                        print(resolution)
                         break
                     elif resConfirm == "N":
                         continue
@@ -349,11 +349,9 @@ while True:
                         if time == maxHour:
                             validTimes = np.array(validTimes)
                             complete = True
-                            print(validTimes)
                             break
                         stepping = getStepping(model, type, resolution)
                         time += stepping[steppingIndex]
-                        print(time)
                         validTimes.append(time)
                         if time == thresholds[thresholdIndex]:
                             steppingIndex += 1
