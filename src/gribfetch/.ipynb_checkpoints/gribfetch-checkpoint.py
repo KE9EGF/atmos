@@ -1,6 +1,6 @@
 # TODO: Add models: RAP, NBM, AIGFS, HIRESW.
 # TODO: Add file testing with requests to make sure if NWS has uploaded files.
-# TODO: oh my god just FIX THE DAMN HOUR SELECTION ALREADY ILULVG@WGHOFHUGV@HUIHURGBFG
+# TODO: oh my god just FIX THE DANG HOUR SELECTION ALREADY ILULVG@WGHOFHUGV@HUIHURGBFG
 while True:
     # Packages, I probably couldn't live without them.
     try:
@@ -21,12 +21,12 @@ while True:
             sys.exit()
             
         # Dictionaries, Lists, Variables, and Other Crap. This took so long.
-        def getStepping(Model, Type, Resolution=None):         
+        def getStepping(model, type, resolution=None):         
             stepping = modelConfig[model]["typeConfig"][type]["stepping"]
-            if Resolution is None:
+            if resolution is None:
                 return stepping
             else:
-                return stepping[Resolution]
+                return stepping[resolution]
         
         def findNearestValidTime(array, value):
             array = np.asarray(array)
@@ -43,7 +43,7 @@ while True:
                 "availableTypes": ["ATM", "PGRB2","PGRB2B", "PGRB2FULL", "GOESSIMPGRB2", "SFC", "SFLUXGRB", "WGNE"],
                 "runTimes": [0, 6, 12, 18], # UTC
                 "archiveLimit": 9, # Days
-                "steppingThresholds": [120], # This is to determine at what forecase hour stepping intervals change
+                "steppingThresholds": [120], # This is to determine at what forecast hour stepping intervals change
                 "testFiles": ["gfs.t{}z.pgrb2.0p25.f000", "gfs.t{}z.pgrb2.0p25.f384"],
                 "typeConfig": {
                     # SFC and ATM files are stored in .NC format.
@@ -339,31 +339,46 @@ while True:
             maxHour = modelConfig[model]["typeConfig"][type]["maxHour"]
             time = minHour
             steppingIndex = 0
-            validTimes = np.array([time])
-            while True:
+            thresholdIndex = 0
+            thresholds = modelConfig[model]["steppingThresholds"]
+            validTimes = [minHour]
+            while not complete:
                 if isinstance(modelConfig[model]["typeConfig"][type]["stepping"], dict):
-                    np.append(validTimes, time)
-                    for threshold in modelConfig[model]["steppingThresholds"]:
-                        if complete:
+                    while not complete:
+                        # Yes, this absolutely looks stupid, and probably isn't very efficient, but it works.
+                        if time == maxHour:
+                            validTimes = np.array(validTimes)
+                            complete = True
+                            print(validTimes)
                             break
-                        while True:
-                            stepping = getStepping(model, type, resolution)
-                            if steppingIndex > len(stepping):
-                                complete = True
-                                break
-                            time += stepping[steppingIndex]
-                            np.append(validTimes, time)
-                            if time >= threshold:
-                                print(validTimes)
-                                steppingIndex += 1
-                                break
+                        stepping = getStepping(model, type, resolution)
+                        time += stepping[steppingIndex]
+                        print(time)
+                        validTimes.append(time)
+                        if time == thresholds[thresholdIndex]:
+                            steppingIndex += 1
+                            thresholdIndex += 1
+                            if steppingIndex > len(stepping) - 1:
+                                steppingIndex -= 1
+                            elif thresholdIndex > len(thresholds) - 1:
+                                thresholdIndex -= 1
                 else:
-                    stepping = getStepping(model, type)
-                    time += stepping
-                    validTimes = np.append(validTimes, time)
-                    if time >= maxHour:
-                        complete = True
-                        break
+                    while not complete:
+                        if time == maxHour:
+                            validTimes = np.array(validTimes)
+                            complete = True
+                            print(validTimes)
+                            break
+                        stepping = getStepping(model, type)
+                        time += stepping[steppingIndex]
+                        validTimes.append(time)
+                        if time == thresholds[thresholdIndex]:
+                            steppingIndex += 1
+                            thresholdIndex += 1
+                            if steppingIndex > len(stepping) - 1:
+                                steppingIndex -= 1
+                            elif thresholdIndex > len(thresholds) - 1:
+                                thresholdIndex -= 1
             while True:
                 if modelConfig[model]["typeConfig"][type]["analysisSupport"] == True:
                     print("\nYour selected type allows you do download an analysis file. Would you like to do that?")
@@ -410,5 +425,3 @@ while True:
     except KeyboardInterrupt:
         print("\n")
         sys.exit()
-
-
