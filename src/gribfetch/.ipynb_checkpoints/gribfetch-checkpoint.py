@@ -1,6 +1,5 @@
 # TODO: Add models: RAP, NBM, AIGFS, HIRESW.
-# TODO: Add file testing with requests to make sure if NWS has uploaded files.
-# TODO: Make date confirmation readable by slicing dateSelection.
+# TODO: Add file checking... again.
 while True:
     # Packages, I probably couldn't live without them.
     try:
@@ -21,12 +20,12 @@ while True:
             sys.exit()
             
         # Dictionaries, Lists, Variables, and Other Crap. This took so long.
-        def getStepping(model, type, resolution=None):         
+        def getStepping(Model, Type, Resolution=None):         
             stepping = modelConfig[model]["typeConfig"][type]["stepping"]
-            if resolution is None:
+            if Resolution is None:
                 return stepping
             else:
-                return stepping[resolution]
+                return stepping[Resolution]
         
         def findNearestValidTime(array, value):
             array = np.asarray(array)
@@ -43,7 +42,7 @@ while True:
                 "availableTypes": ["ATM", "PGRB2","PGRB2B", "PGRB2FULL", "GOESSIMPGRB2", "SFC", "SFLUXGRB", "WGNE"],
                 "runTimes": [0, 6, 12, 18], # UTC
                 "archiveLimit": 9, # Days
-                "steppingThresholds": [120], # This is to determine at what forecast hour stepping intervals change
+                "steppingThresholds": [120], # This is to determine at what forecase hour stepping intervals change
                 "testFiles": ["gfs.t{}z.pgrb2.0p25.f000", "gfs.t{}z.pgrb2.0p25.f384"],
                 "typeConfig": {
                     # SFC and ATM files are stored in .NC format.
@@ -182,56 +181,56 @@ while True:
                     sleep(1)
                 else:
                     try:
-                        int(modelChoice)
+                        modelChoice = int(modelChoice)
+                        modelChoice -= 1
+                        if modelChoice >= 0 and modelChoice <= len(availableModels):
+                            print(f'\nYou chose {availableModels[modelChoice]}. Is this correct?')
+                            modelConfirm = input("(Y/N) --> ").strip().upper()
+                            if modelConfirm == "Y":
+                                model = availableModels[modelChoice].upper()
+                                break
+                            elif modelConfirm == "N":
+                                continue
+                            else:
+                                print("\nReally? You couldn't type Y or N? Butterfingers...")
+                                sleep(1)
+                        else:
+                            print("\nPlease select a valid option.")
+                            sleep(1)
+                            continue
                     except ValueError:
                         print("\nPlease enter a number.")
-                    modelChoice = int(modelChoice)
-                    modelChoice -= 1
-                    if modelChoice >= 0 and modelChoice <= len(availableModels):
-                        print(f'\nYou chose {availableModels[modelChoice]}. Is this correct?')
-                        modelConfirm = input("(Y/N) --> ").strip().upper()
-                        if modelConfirm == "Y":
-                            model = availableModels[modelChoice].upper()
-                            break
-                        elif modelConfirm == "N":
-                            continue
-                        else:
-                            print("\nReally? You couldn't type Y or N? Butterfingers...")
-                            sleep(1)
-                    else:
-                        print("\nPlease select a valid option.")
                         sleep(1)
-                        continue
     
             # Type Selection        
             while True:
                 print(f'\nSelect what type of {model} GRIB you want.\n')
-                for index, type in enumerate(modelConfig[model]["availableTypes"], start=1):
-                    print(f'{index} - {type}')
+                for index, Type in enumerate(modelConfig[model]["availableTypes"], start=1):
+                    print(f'{index} - {Type}')
                 typeChoice = input("--> ").strip()
                 if not typeChoice:
                     print("\nPlease enter a number.")
                     sleep(1)
                 else:
                     try:
-                        int(typeChoice)
+                        typeChoice = int(typeChoice)
+                        typeChoice -= 1
+                        if typeChoice >= 0 and typeChoice < len(modelConfig[model]["availableTypes"]):
+                            print(f'\nYou chose {modelConfig[model]["availableTypes"][typeChoice]}. Is this correct?')
+                            typeConfirm = input("(Y/N) --> ").strip().upper()
+                            if typeConfirm == "Y":
+                                type = modelConfig[model]["availableTypes"][typeChoice]
+                                break
+                            elif typeConfirm == "N":
+                                continue
+                            else:
+                                print("\nReally? You couldn't type Y or N? Butterfingers...")
+                                sleep(1)
+                        else:
+                            print("Please enter a valid option.")
                     except ValueError:
                         print("\nPlease enter a number.")
-                    typeChoice = int(typeChoice)
-                    typeChoice -= 1
-                    if typeChoice >= 0 and typeChoice < len(modelConfig[model]["availableTypes"]):
-                        print(f'\nYou chose {modelConfig[model]["availableTypes"][typeChoice]}. Is this correct?')
-                        typeConfirm = input("(Y/N) --> ").strip().upper()
-                        if typeConfirm == "Y":
-                            type = modelConfig[model]["availableTypes"][typeChoice]
-                            break
-                        elif typeConfirm == "N":
-                            continue
-                        else:
-                            print("\nReally? You couldn't type Y or N? Butterfingers...")
-                            sleep(1)
-                    else:
-                        print("Please enter a valid option.")
+
 
             # Date Selection
             while True:
@@ -252,8 +251,6 @@ while True:
                     print(f'The earliest accessible {model} GRIBs are from: {rawDateLimit.strftime("%Y-%m-%d")}')
                     sleep(1)
                 else:
-                    dateSelection = str(dateSelection)
-                    year
                     print(f'\nYou chose {dateSelection}. Is this correct?')
                     dateConfirm = input("(Y/N) --> ").strip().upper()
                     if dateConfirm == "Y":
@@ -266,6 +263,9 @@ while True:
                         sleep(1)
                     
             # Run Time Selection.
+            # Needed special conditions here to make sure that run
+            # times that have not been made here are not displayed
+            # and thereffore cannot be selected.
             while True:
                 index = 0
                 print(f'\nPlease select a run time (UTC) for your {type} {model} GRIB.')
@@ -276,27 +276,32 @@ while True:
                     else:
                         print(f'{index + 1} - {runTime:02d}:00 UTC')
                     index += 1
-                try:
-                    timeChoice = int(input("--> "))
-                    if timeChoice > index or timeChoice < 0:
-                        print("\nPlease select a valid time.")
-                        sleep(1)
-                        continue
-                    else:
-                        timeChoice -= 1
-                        print(f'\nYou chose {modelConfig[model]["runTimes"][timeChoice]:02d}:00. Is this correct?')
-                        timeConfirm = input("(Y/N) --> ").strip().upper()
-                        if timeConfirm == "Y":
-                            runTime = f'{modelConfig[model]["runTimes"][timeChoice]:02d}'
-                            break
-                        elif timeConfirm == "N":
+                timeChoice = input("--> ").strip()
+                if not timeChoice:
+                    print("\nPlease enter a number.")
+                    sleep(1)
+                else:
+                    try:
+                        timeChoice = int(timeChoice)
+                        if timeChoice > index or timeChoice < 0:
+                            print("\nPlease select a valid time.")
+                            sleep(1)
                             continue
                         else:
-                            print("\nReally? You couldn't type Y or N? Butterfingers...")
-                            sleep(1)
-                except ValueError:
-                    print("Please enter a number.")
-                    sleep(1)
+                            timeChoice -= 1
+                            print(f'\nYou chose {modelConfig[model]["runTimes"][timeChoice]:02d}:00. Is this correct?')
+                            timeConfirm = input("(Y/N) --> ").strip().upper()
+                            if timeConfirm == "Y":
+                                runTime = f'{modelConfig[model]["runTimes"][timeChoice]:02d}'
+                                break
+                            elif timeConfirm == "N":
+                                continue
+                            else:
+                                print("\nReally? You couldn't type Y or N? Butterfingers...")
+                                sleep(1)
+                    except ValueError:
+                        print("Please enter a number.")
+                        sleep(1)
                     
             # Resolution Selection.        
             while True:
@@ -333,50 +338,36 @@ while True:
 
             # Forecast Hour Selection. This was by far the hardest part to figure out.
             # Also yes, I'm using a NumPy array so I can efficiently round entered times
-            # to the nearest valid time in the array, cry about it.
+            # to the nearest valid time in the array, cry about it in Visual Basic.
             complete = False
             minHour = modelConfig[model]["typeConfig"][type]["minHour"]
             maxHour = modelConfig[model]["typeConfig"][type]["maxHour"]
             time = minHour
             steppingIndex = 0
-            thresholdIndex = 0
-            thresholds = modelConfig[model]["steppingThresholds"]
-            validTimes = [minHour]
-            while not complete:
+            validTimes = np.array([minHour])
+            while True:
                 if isinstance(modelConfig[model]["typeConfig"][type]["stepping"], dict):
-                    while not complete:
-                        # Yes, this absolutely looks stupid, and probably isn't very efficient, but it works.
-                        if time == maxHour:
-                            validTimes = np.array(validTimes)
-                            complete = True
+                    for threshold in modelConfig[model]["steppingThresholds"]:
+                        if complete:
                             break
-                        stepping = getStepping(model, type, resolution)
-                        time += stepping[steppingIndex]
-                        validTimes.append(time)
-                        if time == thresholds[thresholdIndex]:
-                            steppingIndex += 1
-                            thresholdIndex += 1
+                        while True:
+                            stepping = getStepping(model, type, resolution)
                             if steppingIndex > len(stepping) - 1:
-                                steppingIndex -= 1
-                            elif thresholdIndex > len(thresholds) - 1:
-                                thresholdIndex -= 1
+                                complete = True
+                                break
+                            time += stepping[steppingIndex]
+                            print(time)
+                            np.append(validTimes, time)
+                            if time >= threshold:
+                                steppingIndex += 1
+                                break
                 else:
-                    while not complete:
-                        if time == maxHour:
-                            validTimes = np.array(validTimes)
-                            complete = True
-                            print(validTimes)
-                            break
-                        stepping = getStepping(model, type)
-                        time += stepping[steppingIndex]
-                        validTimes.append(time)
-                        if time == thresholds[thresholdIndex]:
-                            steppingIndex += 1
-                            thresholdIndex += 1
-                            if steppingIndex > len(stepping) - 1:
-                                steppingIndex -= 1
-                            elif thresholdIndex > len(thresholds) - 1:
-                                thresholdIndex -= 1
+                    stepping = getStepping(model, type)
+                    time += stepping
+                    validTimes = np.append(validTimes, time)
+                    if time >= maxHour:
+                        complete = True
+                        break
             while True:
                 if modelConfig[model]["typeConfig"][type]["analysisSupport"] == True:
                     print("\nYour selected type allows you do download an analysis file. Would you like to do that?")
