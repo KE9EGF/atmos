@@ -1,5 +1,5 @@
 # TODO: Add models: RAP, NBM, AIGFS, HIRESW.
-# TODO: Add file checking... again.
+
 while True:
     # Packages, I probably couldn't live without them.
     try:
@@ -43,13 +43,10 @@ while True:
                 "runTimes": [0, 6, 12, 18], # UTC
                 "archiveLimit": 9, # Days
                 "steppingThresholds": [120], # This is to determine at what forecase hour stepping intervals change
-                "testFiles": ["gfs.t{}z.pgrb2.0p25.f000", "gfs.t{}z.pgrb2.0p25.f384"],
+                "testFiles": ["gfs.t{run}z.pgrb2.0p25.f000", "gfs.t{run}z.pgrb2.0p25.f384"],
                 "typeConfig": {
                     # SFC and ATM files are stored in .NC format.
                     # .NC (NetCDF4) FILES DO NOT HAVE RESOLUTIONS!
-                    # Stepping is... complicated. They can vary with resolution.
-                    # 1-value: [STEPPING (hours)]
-                    # 2-value: [EARLY STEPPING (f<120), LATE STEPPING (f>120)]
                     "ATM": {
                         "resolutions": None,
                         "extension": ".nc",
@@ -57,7 +54,7 @@ while True:
                         "maxHour": 12,
                         "stepping": [1],
                         "analysisSupport": True,
-                        "fileName": "gfs.t{}z.atm{}.nc" # Run Time, Forecast Hour
+                        "fileName": "gfs.t{run}z.atm{fhr}.nc" # Run Time, Forecast Hour
                     },
                     "GOESSIMPGRB2": {
                         "resolutions": ["0p25"],
@@ -66,7 +63,7 @@ while True:
                         "maxHour": 180,
                         "stepping": [3],
                         "analysisSupport": False,
-                        "fileName": "gfs.t{}z.goessimpgrb2.{}.f{}" # Run Time, Resolution, Forecast Hour
+                        "fileName": "gfs.t{run}z.goessimpgrb2.{res}.f{fhr}" # Run Time, Resolution, Forecast Hour
                     },
                     "PGRB2": {
                         "resolutions": ["0p25", "0p50", "1p00"],
@@ -79,7 +76,7 @@ while True:
                             "1p00": [3, 3]
                         },
                         "analysisSupport": True,
-                        "fileName": "gfs.t{}z.pgrb2.{}.f{}" # Run Time, Resolution, Forecast Hour
+                        "fileName": "gfs.t{run}z.pgrb2.{res}.f{fhr}" # Run Time, Resolution, Forecast Hour
                     },
                     "PGRB2B": {
                         "resolutions": ["0p25", "0p50", "1p00"],
@@ -92,7 +89,7 @@ while True:
                             "1p00": [3, 3]
                         },
                         "analysisSupport": True,
-                        "fileName": "gfs.t{}z.pgrb2b.{}.f{}" # Run Time, Resolution, Forecast Hour
+                        "fileName": "gfs.t{run}z.pgrb2b.{res}.f{fhr}" # Run Time, Resolution, Forecast Hour
                     },
                     "PGRB2FULL": {
                         "resolutions": ["0p50"],
@@ -101,7 +98,7 @@ while True:
                         "maxHour": 384,
                         "stepping": [3],
                         "analysisSupport": False,
-                        "fileName": "gfs.t{}z.pgrb2full.{}.f{}" # Run Time, Resolution, Forecast Hour
+                        "fileName": "gfs.t{run}z.pgrb2full.{res}.f{fhr}" # Run Time, Resolution, Forecast Hour
                     },
                     "SFC": {
                         "resolutions": None,
@@ -110,7 +107,7 @@ while True:
                         "maxHour": 12,
                         "stepping": [1],
                         "analysisSupport": True,
-                        "fileName": "gfs.t{}z.sfc.f{}" # Run Time, Forecast Hour
+                        "fileName": "gfs.t{run}z.sfc.f{fhr}" # Run Time, Forecast Hour
                     },
                     "SFLUXGRB": {
                         "resolutions": None,
@@ -119,7 +116,7 @@ while True:
                         "maxHour": 384,
                         "stepping": [1, 3],
                         "analysisSupport": False,
-                        "fileName": "gfs.t{}z.sfluxgrb.f{}" # Run Time, Forecast Hour
+                        "fileName": "gfs.t{run}z.sfluxgrb.f{fhr}" # Run Time, Forecast Hour
                     },
                     "WGNE": {
                         "resolutions": None,
@@ -128,7 +125,7 @@ while True:
                         "maxHour": 180,
                         "stepping": [3],
                         "analysisSupport": False,
-                        "fileName": "gfs.t{}z.wgne.f{}" # Run Time, Forecast Hour
+                        "fileName": "gfs.t{run}z.wgne.f{fhr}" # Run Time, Forecast Hour
                         }
                     }
                 },
@@ -160,7 +157,6 @@ while True:
         # User Input and Conditionals. God this took so long.
         running = True
         while running:
-            # This is in here to constantly update.
             # THESE ARE ALL IN UTC TIME!
             currentDT = dt.datetime.now(dt.timezone.utc)
             currentDate = currentDT.strftime("%Y%m%d")
@@ -265,7 +261,7 @@ while True:
             # Run Time Selection.
             # Needed special conditions here to make sure that run
             # times that have not been made here are not displayed
-            # and thereffore cannot be selected.
+            # and therefore cannot be selected.
             while True:
                 index = 0
                 print(f'\nPlease select a run time (UTC) for your {type} {model} GRIB.')
@@ -276,19 +272,49 @@ while True:
                     else:
                         print(f'{index + 1} - {runTime:02d}:00 UTC')
                     index += 1
-                timeChoice = input("--> ").strip()
-                if not timeChoice:
-                    print("\nPlease enter a number.")
+                try:
+                    timeChoice = int(input("--> "))
+                except ValueError:
+                    print("Please enter a number.")
                     sleep(1)
-                else:
-                    try:
-                        timeChoice = int(timeChoice)
-                        if timeChoice > index or timeChoice < 0:
-                            print("\nPlease select a valid time.")
-                            sleep(1)
-                            continue
-                        else:
-                            timeChoice -= 1
+                    if timeChoice > index or timeChoice < 0:
+                        print("\nPlease select a valid time.")
+                        sleep(1)
+                    else:
+                        timeChoice -= 1
+                        
+                        # File Checking
+                        while True:
+                            url = modelConfig[model]["baseUrl"]
+                            testFiles = modelConfig[model]["testFiles"]
+                            check1 = rq.head(url + testFiles[0])
+                            check2 = rq.head(url + testFiles[1])
+                            if check1.status_code == 404:
+                                print("\nNo or little files have been uploaded for this run time.")
+                                print("It is highly recommended that you back out.")
+                                braveryConfirm = input("Would you still like to proceed? (Y/N) --> ").upper().strip()
+                                if braveryConfirm == "N":
+                                    break
+                                elif braveryConfirm == "Y":
+
+                                    continue
+                                else:
+                                    print("\nReally? You couldn't type Y or N? Butterfingers...")
+                                    sleep(1)
+                            elif check2.status_code == 404:
+                                print("\nSome or most files have been uploaded for this runtime.")
+                                print("""If you wish to have full access to these files, it is
+                                      recommended that you choose an earlier run or date.""")
+                                braveryConfirm = input("Would you still like to proceed? (Y/N) --> ").upper().strip()
+                                # Finish this
+                                if braveryConfirm == "N":
+                                    pass
+                                elif braveryConfirm == "Y":
+                                    pass
+                                else:
+                                    print("\nReally? You couldn't type Y or N? Butterfingers...")
+                                    sleep(1)                                    
+                        while True: 
                             print(f'\nYou chose {modelConfig[model]["runTimes"][timeChoice]:02d}:00. Is this correct?')
                             timeConfirm = input("(Y/N) --> ").strip().upper()
                             if timeConfirm == "Y":
@@ -299,9 +325,7 @@ while True:
                             else:
                                 print("\nReally? You couldn't type Y or N? Butterfingers...")
                                 sleep(1)
-                    except ValueError:
-                        print("Please enter a number.")
-                        sleep(1)
+
                     
             # Resolution Selection.        
             while True:
@@ -414,3 +438,6 @@ while True:
     except KeyboardInterrupt:
         print("\n")
         sys.exit()
+
+
+
