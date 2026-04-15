@@ -1,2 +1,3 @@
-
-.git .gitignore .ipynb_checkpoints .local
+.*
+!.gitignore
+!.git

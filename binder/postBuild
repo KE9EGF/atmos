@@ -2,5 +2,4 @@
 
 git config --global user.name "KE9EGF"
 git config --global user.email "severett078@gmail.com"
-conda env create -f environment.yml
 mamba install -y rich colorama tqdm
