@@ -1,0 +1,16 @@
+name: binder-env
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy=1.26
+  - pandas=2.2
+  - matplotlib=3.8
+  - xarray=2024.*
+  - requests
+  - tqdm
+  - dask
+  - netcdf4
+  - click
+  - colorama
+  - rich
