@@ -7,3 +7,7 @@ dependencies:
   - xarray
   - requests
   - jupyterlab
+  - netcdf4
+  - cartopy
+  - matplotlib
+  - siphon
