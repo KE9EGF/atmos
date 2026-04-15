@@ -7,7 +7,7 @@ while running:
         try:
             import sys, os
             import requests as rq
-            import xarray as xa
+            import xarray as xr
             import datetime as dt
             import numpy as np
             from time import sleep
@@ -35,7 +35,7 @@ while running:
             return array[idx]
 
         availableModels = ["GFS", "NAM", "HRRR", "RAP", "HiResW", "AIGFS", "NBM"]
-        chunkSize = 1028 # kB
+        chunkSize = 4096 # kB
         modelConfig = {
             "GFS": {
                 "baseUrl": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{date}/{run}/atmos/",
@@ -107,7 +107,7 @@ while running:
                         "maxHour": 12,
                         "stepping": [1],
                         "analysisSupport": True,
-                        "fileName": "gfs.t{run}z.sfc.{fhr}.nc"
+                        "fileName": "gfs.t{run}z.sfc{fhr}.nc"
                     },
                     "SFLUXGRB": {
                         "resolutions": None,
@@ -323,6 +323,7 @@ recommended that you choose an earlier run or date.""")
             while True:
                 if modelConfig[model]["typeConfig"][type]["resolutions"] == None:
                     print(f'\nResolutions are not available for the {type} {model} GRIB. This may be a .NC file. Proceeding.')
+                    res = "None"
                     break
                 elif len(modelConfig[model]["typeConfig"][type]["resolutions"]) == 1:
                     print(f'\nOnly one available resolution for the {type} {model} GRIB. Selecting {modelConfig[model]["typeConfig"][type]["resolutions"][0].replace("p", ".")}°.')
@@ -427,7 +428,7 @@ Model: {model}
 Type:  {type}
 Date:  {year}-{month}-{day}
 Run:   {int(runTime):02d}:00Z
-Res:   {res.replace("p", ".")}°
+Res:   {res.replace("p", ".")}
 Anl?:  {anlSelected}
 FHR:   {fhr.replace("f", "")}""")
                 print("\nAre these all correct?")
@@ -447,6 +448,7 @@ FHR:   {fhr.replace("f", "")}""")
             # This filename will act as the file path, being the download 
             # destination in the directory this program is run in.
             fileName = modelConfig[model]["typeConfig"][type]["fileName"].format(run=runTime, res=res, fhr=fhr)
+            print(url + fileName)
             check = rq.head(url + fileName)
             if check.status_code in (404, 403):
                 print("The file with your selected attributes is unavailable")
@@ -457,7 +459,7 @@ FHR:   {fhr.replace("f", "")}""")
             # Source - https://stackoverflow.com/a/37573701
             # Posted by leovp, modified by community. See post 'Timeline' for change history
             # Retrieved 2026-04-14, License - CC BY-SA 4.0
-            response = rq.get(url, stream=True)
+            response = rq.get(url + fileName, stream=True)
             totalSize = int(response.headers.get("content-length", 0))                
             with tqdm(total=totalSize, unit="B", unit_scale=True) as progressBar:
                 with open(fileName, "wb") as file:
@@ -474,13 +476,11 @@ FHR:   {fhr.replace("f", "")}""")
             # extension attached to them (e.g. .nc, .grib2), this small
             # conditional solves that, as it is rather annoying to
             # manually rename it.
-            # FINISH THIS!
             if extension not in fileName:
                 os.rename(fileName, fileName + extension)
-            print("\n")
+                fileName = fileName + extension
+            # FINISH THIS
+
     except KeyboardInterrupt:
         print("\n")
         sys.exit()
-
-
-
