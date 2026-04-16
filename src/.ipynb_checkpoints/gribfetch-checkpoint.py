@@ -19,12 +19,12 @@ while running:
             sys.exit()
             
         # Dictionaries, Lists, Variables, and Other Crap. This took so long.
-        def getStepping(Model, Type, Resolution=None):         
+        def getStepping(model, type, resolution=None):         
             stepping = modelConfig[model]["typeConfig"][type]["stepping"]
-            if Resolution is None:
+            if resolution is None:
                 return stepping
             else:
-                return stepping[Resolution]
+                return stepping[resolution]
         
         # Source - https://stackoverflow.com/a/68994644
         # Posted by user8017857
@@ -484,3 +484,6 @@ FHR:   {fhr.replace("f", "")}""")
     except KeyboardInterrupt:
         print("\n")
         sys.exit()
+
+
+

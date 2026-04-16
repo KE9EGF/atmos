@@ -1,4 +1,3 @@
-name: binder-env
 channels:
   - conda-forge
 dependencies:
@@ -12,5 +11,8 @@ dependencies:
   - dask
   - netcdf4
   - click
+  - typer
   - colorama
   - rich
+  - curses
+  - textual
