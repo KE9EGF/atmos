@@ -7,7 +7,6 @@ while running:
         try:
             import sys, os
             import requests as rq
-            import xarray as xr
             import datetime as dt
             import numpy as np
             from time import sleep
@@ -178,7 +177,7 @@ while running:
                             print(f'\nYou chose {availableModels[modelChoice]}. Is this correct?')
                             modelConfirm = input("(Y/N) --> ").strip().upper()
                             if modelConfirm == "Y":
-                                model = availableModels[modelChoice].upper()
+                                model = availableModels[modelChoice]
                                 break
                             elif modelConfirm == "N":
                                 continue
@@ -479,7 +478,6 @@ FHR:   {fhr.replace("f", "")}""")
             if extension not in fileName:
                 os.rename(fileName, fileName + extension)
                 fileName = fileName + extension
-            # FINISH THIS
 
     except KeyboardInterrupt:
         print("\n")
