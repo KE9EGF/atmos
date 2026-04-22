@@ -1,8 +1,4 @@
-* {
-    text-align: center;
-}
-
-.model-buttons {
+.models {
     height: 4;
     margin: 1;
     color: rgb(255, 255, 255);
