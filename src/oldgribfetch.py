@@ -5,7 +5,7 @@ while running:
     # Packages, I probably couldn't live without them.
     try:
         try:
-            import sys, os
+            import sys, os, json
             import requests as rq
             import datetime as dt
             import numpy as np
@@ -35,119 +35,8 @@ while running:
 
         availableModels = ["GFS", "NAM", "HRRR", "RAP", "HiResW", "AIGFS", "NBM"]
         chunkSize = 4096 # kB
-        modelConfig = {
-            "GFS": {
-                "baseUrl": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{date}/{run}/atmos/",
-                "availableTypes": ["ATM", "PGRB2","PGRB2B", "PGRB2FULL", "GOESSIMPGRB2", "SFC", "SFLUXGRB", "WGNE"],
-                "runTimes": [0, 6, 12, 18],     # UTC
-                "archiveLimit": 9,              # Days
-                "steppingThresholds": [120],    # This is to determine at what forecast hour the stepping intervals change
-                "testFiles": ["gfs.t{run}z.pgrb2.0p25.f000", "gfs.t{run}z.pgrb2.0p25.f384"],
-                "typeConfig": {
-                    # SFC and ATM files are stored in .NC format.
-                    # .NC (NetCDF4) FILES DO NOT HAVE RESOLUTIONS!
-                    "ATM": {
-                        "resolutions": None,
-                        "extension": ".nc",
-                        "minHour": 0,
-                        "maxHour": 12,
-                        "stepping": [1],
-                        "analysisSupport": True,
-                        "fileName": "gfs.t{run}z.atm{fhr}.nc"
-                    },
-                    "GOESSIMPGRB2": {
-                        "resolutions": ["0p25"],
-                        "extension": ".grib2",
-                        "minHour": 0,
-                        "maxHour": 180,
-                        "stepping": [3],
-                        "analysisSupport": False,
-                        "fileName": "gfs.t{run}z.goessimpgrb2.{res}.{fhr}"
-                    },
-                    "PGRB2": {
-                        "resolutions": ["0p25", "0p50", "1p00"],
-                        "extension": ".grib2",
-                        "minHour": 0,
-                        "maxHour": 384,
-                        "stepping": {
-                            "0p25": [1, 3],
-                            "0p50": [3, 3],
-                            "1p00": [3, 3]
-                        },
-                        "analysisSupport": True,
-                        "fileName": "gfs.t{run}z.pgrb2.{res}.{fhr}"
-                    },
-                    "PGRB2B": {
-                        "resolutions": ["0p25", "0p50", "1p00"],
-                        "extension": ".grib2",
-                        "minHour": 0,
-                        "maxHour": 384,
-                        "stepping": {
-                            "0p25": [1, 3],
-                            "0p50": [3, 3],
-                            "1p00": [3, 3]
-                        },
-                        "analysisSupport": True,
-                        "fileName": "gfs.t{run}z.pgrb2b.{res}.{fhr}"
-                    },
-                    "PGRB2FULL": {
-                        "resolutions": ["0p50"],
-                        "extension": ".grib2",
-                        "minHour": 0,
-                        "maxHour": 384,
-                        "stepping": [3],
-                        "analysisSupport": False,
-                        "fileName": "gfs.t{run}z.pgrb2full.{res}.{fhr}"
-                    },
-                    "SFC": {
-                        "resolutions": None,
-                        "extension": ".nc",
-                        "minHour": 1,
-                        "maxHour": 12,
-                        "stepping": [1],
-                        "analysisSupport": True,
-                        "fileName": "gfs.t{run}z.sfc{fhr}.nc"
-                    },
-                    "SFLUXGRB": {
-                        "resolutions": None,
-                        "extension": ".grib2",
-                        "minHour": 0,
-                        "maxHour": 384,
-                        "stepping": [1, 3],
-                        "analysisSupport": False,
-                        "fileName": "gfs.t{run}z.sfluxgrb.{fhr}.grib2"
-                    },
-                    "WGNE": {
-                        "resolutions": None,
-                        "extension": ".grib2",
-                        "minHour": 3,
-                        "maxHour": 180,
-                        "stepping": [3],
-                        "analysisSupport": False,
-                        "fileName": "gfs.t{run}z.wgne.{fhr}"
-                        }
-                    }
-                },
-            "NAM": {
-                "baseUrl": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/nam/prod/"
-            },
-            "HRRR": {
-
-            },
-            "RAP": {
-
-            },
-            "HIRESW": {
-                
-            },
-            "NBM": {
-                
-            },
-            "AIGFS": {
-                
-            }
-        }
-        
+        with open("modelConfig.json", "r") as file:
+            modelConfig = json.load(file)
         # User Input and Conditionals. God this took so long.
         running = True
         while running:
@@ -398,7 +287,7 @@ recommended that you choose an earlier run or date.""")
                 try:
                     fhr = int(fhr)
                     if fhr not in validTimes:
-                        fhr = findNearest(validTimes, fhr)
+                        fhr = f'{findNearest(validTimes, fhr):03d}'
                         print(f'\nInvalid hour. Selecting forecast hour #{fhr} instead.')
                         sleep(1)
                     elif fhr < 0:
@@ -408,7 +297,7 @@ recommended that you choose an earlier run or date.""")
                     print(f'\nYou chose forecast hour #{fhr}. Is this correct?')
                     fhrConfirm = input("(Y/N) --> ").strip().upper()
                     if fhrConfirm == "Y":
-                        fhr = f'f{fhr}'
+                        fhr = f'f{fhr:03d}'
                         break
                     elif fhrConfirm == "N":
                         continue

@@ -2,6 +2,7 @@
     "GFS": {
         "baseUrl": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{date}/{run}/atmos/",
         "availableTypes": ["ATM", "PGRB2","PGRB2B", "PGRB2FULL", "GOESSIMPGRB2", "SFC", "SFLUXGRB", "WGNE"],
+        "regions": null,
         "runTimes": [0, 6, 12, 18], 
         "archiveLimit": 9,          
         "steppingThresholds": [120],
