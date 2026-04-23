@@ -1,7 +1,0 @@
-.models {
-    height: 4;
-    margin: 1;
-    color: rgb(255, 255, 255);
-    background: rgb(69, 16, 108);
-    border: outer rgb(89, 36, 128);
-}
