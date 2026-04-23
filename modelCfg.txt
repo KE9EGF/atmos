@@ -1,0 +1,15 @@
+{
+    "GFS": {
+        "url": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{date}/{run}/atmos/",
+        "runs": ["00", "06","12", "18"],
+        "types": ["atm", "goessimpgrb2", "pgrb2", "pgrb2b", "pgrb2full", "sfc", "sfluxgrib", "wgne"],
+        "testFiles": ["gfs.t{run}z.pgrb2.0p25.f000", "gfs.t{run}z.pgrb2.0p25.f384"],
+        "typeCfg": {
+            "atm": {
+                "fileName": "gfs.t{run}z.atm{fhr}.nc",
+                "resolutions": null,
+                "null": null
+            },
+        }
+    }
+}
