@@ -13,5 +13,5 @@ dependencies:
   - click
   - typer
   - rich
-  - ncurses
-  - textual
+  - httpx
+  - getkey
