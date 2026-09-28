@@ -15,4 +15,5 @@ dependencies:
   - rich
   - httpx
   - readchar
+  - feedparser
   - uv

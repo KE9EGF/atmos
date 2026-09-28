@@ -68,6 +68,13 @@ def keyListener():
 keyThread = threading.Thread(target=keyListener, daemon=True)
 keyThread.start()
 
+# TESTING SECTION
+d = feedparser.parse(AC_RSS)
+print(d.entries[0].title)
+print(d.entries[0].description)
+
+sys.exit()
+    
 # Main Sequence
 while running:
     console.clear()
@@ -80,3 +87,6 @@ while running:
     except KeyboardInterrupt:
         console.clear()
         sys.exit()
+
+
+
