@@ -1,19 +1,32 @@
 channels:
   - conda-forge
+
 dependencies:
-  - python=3.11
-  - numpy=1.26
-  - pandas=2.2
-  - matplotlib=3.8
-  - xarray=2024.*
-  - requests
-  - tqdm
+  - python=3.14.3
+  - numpy
+  - pandas
+  - scipy
+  - xarray
   - dask
   - netcdf4
+  - h5netcdf
+  - cfgrib
+  - eccodes
+  - requests
+  - httpx
+  - feedparser
+  - tqdm
+  - matplotlib
+  - pillow
+  - cartopy
+  - shapely
+  - pyproj
+  - geopandas
+  - metpy
   - click
   - typer
   - rich
-  - httpx
   - readchar
-  - feedparser
-  - uv
+  - jupyterlab
+  - ipywidgets
+  - textual
