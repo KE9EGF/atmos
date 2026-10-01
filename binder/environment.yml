@@ -10,8 +10,6 @@ dependencies:
   - dask
   - netcdf4
   - h5netcdf
-  - cfgrib
-  - eccodes
   - requests
   - httpx
   - feedparser
