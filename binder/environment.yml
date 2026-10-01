@@ -4,14 +4,29 @@ channels:
   - conda-forge
 
 dependencies:
-  - python=3.14
+  - python=3.12
   - numpy
   - pandas
   - scipy
   - xarray
-  - matplotlib
-  - requests
-  - metpy
-  - cartopy
+  - dask
   - netcdf4
   - h5netcdf
+  - cfgrib
+  - eccodes
+  - requests
+  - httpx
+  - feedparser
+  - tqdm
+  - matplotlib
+  - pillow
+  - cartopy
+  - shapely
+  - pyproj
+  - geopandas
+  - metpy
+  - textual
+  - click
+  - typer
+  - rich
+  - readchar
