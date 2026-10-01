@@ -3,6 +3,7 @@ channels:
 
 dependencies:
   - python=3.14.3
+  - zipp=3.22
   - numpy
   - pandas
   - scipy
