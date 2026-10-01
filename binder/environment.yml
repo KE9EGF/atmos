@@ -1,29 +1,17 @@
+name: atmos
+
 channels:
   - conda-forge
 
 dependencies:
-  - python=3.14.3
-  - zipp=3.22
+  - python=3.14
   - numpy
   - pandas
   - scipy
   - xarray
-  - dask
+  - matplotlib
+  - requests
+  - metpy
+  - cartopy
   - netcdf4
   - h5netcdf
-  - requests
-  - httpx
-  - feedparser
-  - tqdm
-  - matplotlib
-  - pillow
-  - cartopy
-  - shapely
-  - pyproj
-  - geopandas
-  - metpy
-  - click
-  - typer
-  - rich
-  - readchar
-  - textual
