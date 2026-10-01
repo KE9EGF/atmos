@@ -25,6 +25,4 @@ dependencies:
   - typer
   - rich
   - readchar
-  - jupyterlab
-  - ipywidgets
   - textual
