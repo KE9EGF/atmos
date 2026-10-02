@@ -21,10 +21,10 @@ if r.status_code == 200:
 
     glossary = data.get('glossary', [])
     for item in glossary:
-        item['definition'].replace("<br>", "")
-with open("output.txt", "w") as f:
-    print(glossary, file=f)
-
+        item['definition'] = item['definition'].replace("<br>", "")
+    with open("output.txt", "w") as f:
+        print(glossary, file=f)
+    print(glossary)
 def get_definition(term):
     try:
         r = requests.get(url, headers=headers)
